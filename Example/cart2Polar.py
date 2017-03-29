@@ -2,29 +2,32 @@
 
 
 import numpy
-import scipy
-
+import scipy as sp
+import display as imshow
+from  scipy import ndimage
 # Cart2Polar cartesian to Polar
-# String file name 
+# filename name of image file 
 # fmt format type, like .jpg .jpeg ...
 # normalize  bool 
 #absAngle 1 to [0,180] ; 0 to [-180,180]
-def cart2Polar(string,fmt = '.jpg', normalize=0, absAngle = 1):
-    im = scipy.misc.imread(string+fmt)
+def cart2Polar(filename,fmt = '.jpg', normalize=0, absAngle = 1):
+    im = sp.misc.imread(filename+fmt)
     im = im.astype('int32')
-    dx = scipy.ndimage.sobel(im, 0) 
-    dy = scipy.ndimage.sobel(im, 1)  
+    dx = ndimage.sobel(im, 0) 
+    dy = ndimage.sobel(im, 1)  
     mag = numpy.hypot(dx, dy)  # sqrt(dx*dx + dy*dy)
     teta = numpy.rad2deg(numpy.arctan2(dy,dx)) #arctan(dy/dx) OBS:[-180, 180]
     if normalize:
         mag *= 255.0 / numpy.max(mag)  # normalize (Q&D)
     if absAngle:
         teta = numpy.abs(teta)
-    scipy.misc.imsave(string+'_mag'+fmt, mag)
-    scipy.misc.imsave(string+'_ang'+fmt, teta)
-    scipy.misc.imsave(string+'_dx'+fmt, dx)
-    scipy.misc.imsave(string+'_dy'+fmt, dy)
+    sp.misc.imsave(filename+'_mag'+fmt, mag)
+    sp.misc.imsave(filename+'_ang'+fmt, teta)
+    sp.misc.imsave(filename+'_dx'+fmt, dx)
+    sp.misc.imsave(filename+'_dy'+fmt, dy)
     return mag,teta
 
 
 mag , teta = cart2Polar ("test")
+
+dp.display("test_mag")
