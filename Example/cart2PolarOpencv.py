@@ -2,6 +2,13 @@ import cv2
 import numpy as np
 src = cv2.imread("testBlock.jpg")
 
+# Cell Size 6x6 
+# Block Size 3x3 (cell's)
+# Method L1-Sqrt V = sqrt(V/ ||V|| + e)
+def  blockNormalization(cell,block):
+    summatory = np.sum(block)+0.1
+    cell = np.sqrt(cell/summatory)
+    return cell
 
 # getHistogramOfGradients(src) get the histogram of gradients of a BGR picture
 # Src a opencv imread picture
@@ -31,5 +38,6 @@ def getHistogramOfGradients(src):
             histogramOfGradients[int(hogIndex)+1] += nextValue
     return histogramOfGradients
 
-getHistogramOfGradients(src)
-                    
+hog = getHistogramOfGradients(src)
+nHog = blockNormalization(hog,hog)
+             
