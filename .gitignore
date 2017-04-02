@@ -1,2 +1,3 @@
 Example/test*
 *.pyc
+Data/*
