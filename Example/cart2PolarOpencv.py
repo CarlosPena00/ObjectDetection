@@ -22,7 +22,8 @@ def getHistogramOfGradients(src):
     #Vector
     # 0(180) | 20 | 40 | 60 | 80 | 100 | 120 | 140 | 160
     histogramOfGradients = np.zeros(9)
-    rows,cols,channel = src.shape
+    cols,rows,channel = src.shape
+
     for j in range(0, rows):
         for i in range(0,cols):
             maxIndex  = gradientMagnitude[i][j].argmax() # get Max magnitude (B;G;R)
