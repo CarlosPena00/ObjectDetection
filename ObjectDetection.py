@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import sys
 sys.path.insert(0, 'Example')
 import cart2PolarOpencv as HOG
+import svm as sv
 
 def getX(fromFile = 0,positive = 1):
     if positive == 1:
@@ -51,4 +52,9 @@ YN = np.zeros(shape=(452,1), dtype = int)
 X = np.vstack((XP,XN))
 y = np.vstack((YP,YN))
 Matrix = np.hstack((X,y))
+
+X_train,X_test,y_train,y_test,y_pred,classifier,cm = sv.svm(X,y)
+
+
+   
 
