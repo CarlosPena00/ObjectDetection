@@ -25,6 +25,7 @@ def getX(fromFile = 0,positive = 1):
         
         lista = []
         for i in range(1,NUM_OF_IMGS+1):#13233
+            #Full image set (already cut, in ratio 1:1)
             src = cv2.imread(VAR+str(i)+TYPEFILE)
             src = cv2.pyrDown(src)
             src = cv2.pyrDown(src)

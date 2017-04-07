@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
-#src = cv2.imread("testBlock.jpg")
+import matplotlib.pyplot as plt
+src = cv2.imread("test.jpg")
 
 # Cell Size 6x6 
 # Block Size 3x3 (cell's)
@@ -42,4 +43,7 @@ def getHistogramOfGradients(src):
 
 #hog = getHistogramOfGradients(src)
 #nHog = blockNormalization(hog,hog)
-             
+
+def getROI(src, idY, idX = 0 ,px = 6 ):
+    a = src[(px+(idX-1)*px):(px+idX*px) ,  (px+(idY-1)*px):(px+idY*px), :]
+    return a
