@@ -6,14 +6,14 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import sys
 sys.path.insert(0, 'Example')
-import cart2PolarOpencv as HOG
+import HOG as HOG
 import svm as sv
-
+from tqdm import tqdm
 def getX(fromFile = 0,positive = 1):
     if positive == 1:
         VAR = "Data/positive/"
         CSV = "CSV/Positive_Samples.csv"
-        NUM_OF_IMGS = 13233
+        NUM_OF_IMGS =13233
         TYPEFILE = ".jpg"
     else:
         VAR = "Data/negative/"
@@ -21,22 +21,16 @@ def getX(fromFile = 0,positive = 1):
         NUM_OF_IMGS = 453
         TYPEFILE = ".png"
     if fromFile == 0:        
-        
-        
-        lista = []
-        for i in range(1,NUM_OF_IMGS+1):#13233
+        lista = np.empty([1,26244])
+        for i in tqdm(range(1,NUM_OF_IMGS+1)):#13233
             #Full image set (already cut, in ratio 1:1)
             src = cv2.imread(VAR+str(i)+TYPEFILE)
             src = cv2.pyrDown(src)
-            src = cv2.pyrDown(src)
             histG = HOG.getHistogramOfGradients(src)
-            histGN = HOG.blockNormalization(histG,histG)
-            lista.append(histGN)
+            lista = np.vstack((lista,histG))
             #lista.extend(histG)        
-            if i%int(NUM_OF_IMGS/100) == 0:
-                print str(int( i/float(NUM_OF_IMGS) * 100))+"%"
-        
-        X = np.array(lista)
+           
+        X = np.delete(lista,(0),axis=0)
         np.savetxt(CSV,X,delimiter= ",",fmt="%.2f")
     else:
         dataset = pd.read_csv(CSV)
@@ -44,7 +38,13 @@ def getX(fromFile = 0,positive = 1):
     return X
 
 
-XN = getX(fromFile = 1, positive= 0)
+#XN = getX(fromFile = 0, positive= 1)
+import time
+start_time = time.time()
+x = getX(fromFile = 0, positive= 1)
+print (time.time() - start_time)
+
+"""
 XP = getX(fromFile = 1, positive= 1)
 YP = np.ones(shape=(13232,1),dtype = int)
 YN = np.zeros(shape=(452,1), dtype = int)
@@ -56,6 +56,6 @@ Matrix = np.hstack((X,y))
 
 X_train,X_test,y_train,y_test,y_pred,classifier,cm = sv.svm(X,y)
 
-
+"""
    
 
