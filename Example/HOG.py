@@ -9,7 +9,7 @@ import numpy as np
 #idY index of the block/cell
 #idX index of the block/cell
 #px shape of the block/cell (px,px,;)
-def getROI(gMag,gDir, idY, idX = 0 ,px = 6 ):
+def getROI(gMag,gDir, idY, idX = 0 ,px = 8 ):
     rMag = gMag[(px+(idX-1)*px):(px+idX*px) ,  (px+(idY-1)*px):(px+idY*px), :]
     rDir = gDir[(px+(idX-1)*px):(px+idX*px) ,  (px+(idY-1)*px):(px+idY*px), :]
     return rMag,rDir
@@ -55,14 +55,14 @@ def getHistogramOfGradients(src):
     cols,rows,channel = src.shape
     fullHOG = []
     #Get Block 3x3 cells
-    for delX in range(0,(cols/6)-2):
-        for delY in range (0,(rows/6)-2):
+    for delX in range(0,(cols/8)-1):
+        for delY in range (0,(rows/8)-1):
             cellHOG = []
             #Block Area -> 3x3 cells
-            rMag, rDir = getROI(gMag,gDir,delY,delX,px = 18)#6*3
+            rMag, rDir = getROI(gMag,gDir,delY,delX,px = 16)#6*3 or 8*2
             
-            for i in range (0,3):
-                for j in range(0,3):        
+            for i in range (0,2): # 2x2 Block
+                for j in range(0,2):        
                     cMag,cDir = getROI(gMag,gDir,i,j)                    
                     #cellHOG.append(getSimpleHOG(rMag,rDir))
                     cellHOG = np.hstack((cellHOG,getSimpleHOG(cMag,cDir)))
@@ -74,7 +74,11 @@ def getHistogramOfGradients(src):
 
 
 ##Just for debug
-#src = cv2.imread("test.jpg")
+#src = cv2.imread("Data/positive/1.jpg")
+#print src.shape
+#src2 = cv2.resize(src,(64,128))
+#print src2.shape
+#hog = getHistogramOfGradients(src3)
 #src = cv2.pyrDown(src)
 #src = cv2.pyrDown(src)
 #a = getHistogramOfGradients(src)

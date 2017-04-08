@@ -21,12 +21,13 @@ def getX(fromFile = 0,positive = 1):
         NUM_OF_IMGS = 453
         TYPEFILE = ".png"
     if fromFile == 0:        
-        lista = np.empty([1,26244])
+        lista = np.empty([1,7056])
         for i in tqdm(range(1,NUM_OF_IMGS+1)):#13233
             #Full image set (already cut, in ratio 1:1)
             src = cv2.imread(VAR+str(i)+TYPEFILE)
             src = cv2.pyrDown(src)
             histG = HOG.getHistogramOfGradients(src)
+            
             lista = np.vstack((lista,histG))
             #lista.extend(histG)        
            
@@ -39,10 +40,11 @@ def getX(fromFile = 0,positive = 1):
 
 
 #XN = getX(fromFile = 0, positive= 1)
-import time
-start_time = time.time()
-x = getX(fromFile = 0, positive= 1)
-print (time.time() - start_time)
+
+x = getX(fromFile = 1, positive= 1)
+
+
+
 
 """
 XP = getX(fromFile = 1, positive= 1)
