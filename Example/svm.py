@@ -11,7 +11,7 @@ def svm (X,y):
     sc_X = StandardScaler()
     X_train = sc_X.fit_transform(X_train)
     X_test = sc_X.transform(X_test)
-    classifier = SVC(kernel = 'rbf', random_state = 0)
+    classifier = SVC(kernel = 'linear', random_state = 0)
     # Kernel cam be linear, poly, rbf, sigmoid
     classifier.fit(X_train,y_train)
     y_pred = classifier.predict(X_test)
