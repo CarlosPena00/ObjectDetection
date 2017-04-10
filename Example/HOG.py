@@ -13,7 +13,14 @@ def getROI(gMag,gDir, idY, idX = 0 ,px = 8 ):
     rMag = gMag[(px+(idX-1)*px):(px+idX*px) ,  (px+(idY-1)*px):(px+idY*px), :]
     rDir = gDir[(px+(idX-1)*px):(px+idX*px) ,  (px+(idY-1)*px):(px+idY*px), :]
     return rMag,rDir
-
+##getROIsrc get region of interest, part of matrix
+#src input Matrix
+#idY index of the block/cell
+#idX index of the block/cell
+#px shape of the block/cell (px,px,;)
+def getROIsrc(src,idY,idX, px = 8):
+    return src[(px+(idX-1)*px):(px+idX*px) ,  (px+(idY-1)*px):(px+idY*px), :]
+    
 ##cart2Polar return gradientMagnitude,gradientDirection of a img
 #src input matrix
 def cart2Polar(src):
