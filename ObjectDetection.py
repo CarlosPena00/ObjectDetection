@@ -11,25 +11,25 @@ sys.path.insert(0, 'Example')
 import HOG as HOG
 import svm as sv
 
-FILE_NAME = 'finalized_model20k.sav'
-#Input will be (125,125,?)
+FILE_NAME = 'finalized_model8k.sav'
+#Input will be (86,86,?)
 def getX(fromFile = 0,positive = 1):
     if positive == 1:
-        VAR = "Data/positive/"
+        VAR = "Data/positive2/"
         CSV = "CSV/Positive_Samples.csv"
-        NUM_OF_IMGS =13233
-        TYPEFILE = ".jpg"
+        NUM_OF_IMGS = 4964
+        TYPEFILE = ".ppm"
     else:
-        VAR = "Data/negative/"
+        VAR = "Data/negative2/"
         CSV = "CSV/Negative_Samples.csv"
-        NUM_OF_IMGS = 7512
+        NUM_OF_IMGS = 4675
         TYPEFILE = ".JPEG"
     if fromFile == 0:        
-        lista = np.empty([1,7056])
+        lista = np.empty([1,2916])
         for i in tqdm(range(1,NUM_OF_IMGS+1)):#13233
             #Full image set (already cut, in ratio 1:1)
             src = cv2.imread(VAR+str(i)+TYPEFILE)
-            src = cv2.resize(src,(125,125))
+            src = cv2.resize(src,(86,86))
             histG = HOG.getHistogramOfGradients(src)            
             lista = np.vstack((lista,histG))
             #lista.extend(histG)        
@@ -41,23 +41,29 @@ def getX(fromFile = 0,positive = 1):
         X = dataset.iloc[:,:].values
     return X
 
-XN = getX(fromFile = 1, positive= 0)
-XP = getX(fromFile = 1, positive= 1)
-
-YP = np.ones(shape=(13232,1),dtype = int)
-YN = np.zeros(shape=(7511,1), dtype = int)
-
-X = np.vstack((XP,XN))
-y = np.vstack((YP,YN))
-
-Matrix = np.hstack((X,y))
-fromFile = 1
-if fromFile == 0:
-    X_train,X_test,y_train,y_test,y_pred,classifier,cm = sv.svm(X,y)
-    pickle.dump(classifier, open(FILE_NAME, 'wb'))
+if len(sys.argv) <=1:
+    print "Error not flags: -c XN XP C -l C"
 else:
-    loaded_model = pickle.load(open(FILE_NAME, 'rb'))
-#result = loaded_model.score(X_test, y_test)
+    if sys.argv[1] == '-c':
+        if sys.argv[2] == 'XN':
+            XN = getX(fromFile = 0, positive= 0)
+            YN = np.zeros(shape=(4674,1), dtype = int)
+                    
+        if sys.argv[2] == 'XP':
+            XP = getX(fromFile = 0, positive= 1)
+            YP = np.ones(shape=(4963,1),dtype = int)
+        if sys.argv[2] == 'C':
+            XN = getX(fromFile = 1, positive= 0)
+            YN = np.zeros(shape=(4674,1), dtype = int)
+            XP = getX(fromFile = 1, positive= 1)
+            YP = np.ones(shape=(4963,1),dtype = int)
+            X = np.vstack((XP,XN))
+            y = np.vstack((YP,YN))
+            X_train,X_test,y_train,y_test,y_pred,classifier,cm = sv.svm(X,y)
+            pickle.dump(classifier, open(FILE_NAME, 'wb'))
+            print cm
+    if sys.argv[1] == '-l':
+        if sys.argv[2] == 'C':
+            loaded_model = pickle.load(open(FILE_NAME, 'rb'))
 
-#print(result)
 
