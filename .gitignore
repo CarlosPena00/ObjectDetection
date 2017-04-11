@@ -2,3 +2,4 @@ Example/test*
 *.pyc
 Data/*
 CSV/*
+Model/*
