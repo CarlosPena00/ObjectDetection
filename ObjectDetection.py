@@ -11,28 +11,34 @@ sys.path.insert(0, 'Example')
 import HOG as HOG
 import svm as sv
 
-
+NUM_OF_IMGS_P = 4964
+NUM_OF_IMGS_N = 4684
 #Input will be (86,86,?)
 def getX(fromFile = 0,positive = 1):
+
     if positive == 1:
         VAR = "Data/positive2/"
         CSV = "CSV/Positive_Samples.csv"
-        NUM_OF_IMGS = 4964
+        NUM_OF_IMGS = NUM_OF_IMGS_P
         TYPEFILE = ".ppm"
     else:
         VAR = "Data/negative2/"
         CSV = "CSV/Negative_Samples.csv"
-        NUM_OF_IMGS = 4675
+        NUM_OF_IMGS = NUM_OF_IMGS_N
         TYPEFILE = ".JPEG"
     if fromFile == 0:        
         lista = np.empty([1,2916])
         for i in tqdm(range(1,NUM_OF_IMGS+1)):#13233
             #Full image set (already cut, in ratio 1:1)
             src = cv2.imread(VAR+str(i)+TYPEFILE)
-            src = cv2.resize(src,(86,86))
-            histG = HOG.getHistogramOfGradients(src)            
+            rows,cols,channel = src.shape 
+            if rows > 1 and cols > 1:
+                src = cv2.resize(src,(86,86))
+                histG = HOG.getHistogramOfGradients(src)
+            else:
+                histG = np.zeros(2916)
             lista = np.vstack((lista,histG))
-            #lista.extend(histG)        
+                #lista.extend(histG)        
            
         X = np.delete(lista,(0),axis=0)
         np.savetxt(CSV,X,delimiter= ",",fmt="%.2f")
@@ -44,7 +50,7 @@ def getX(fromFile = 0,positive = 1):
 def train(classifier,stdScaler, std = 0):
     if std == 0:
         VAR = "Data/positive2/"
-        NUM_OF_IMGS = 4964
+        NUM_OF_IMGS = NUM_OF_IMGS_P
         TYPEFILE = ".ppm"
         for i in tqdm(range(1,NUM_OF_IMGS+1)):#13233
             src = cv2.imread(VAR+str(i)+TYPEFILE)
@@ -56,6 +62,7 @@ def train(classifier,stdScaler, std = 0):
         VAR = "Example/test"
         TYPEFILE = ".jpg"
         src = cv2.imread(VAR+TYPEFILE)
+        src2 = src.copy()
         srcUp = src#cv2.pyrUp(src)
         rows,cols,channel = src.shape
         maxRows = rows/86
@@ -71,8 +78,10 @@ def train(classifier,stdScaler, std = 0):
                         histG = HOG.getHistogramOfGradients(roi)
                         histGE = stdScaler.transform(histG)
                         if classifier.predict(histGE):
+                            cv2.rectangle(src2,((dX*20+86+(i-1)*86),(dY*20+86+(j-1)*86)),((dX*20+86+i*86),(dY*20+86+j*86)),(0,0,255))
                             plt.imshow(cv2.cvtColor(roi,cv2.COLOR_BGR2RGB))
-                            plt.savefig(str(j*1000)+str(i*100)+str(dY*10)+str(dX)+"Foi"+".jpg")
+                            cv2.imwrite("Img/"+str(j*1000)+str(i*100)+str(dY*10)+str(dX)+"Foi"+".jpg",roi)
+        cv2.imwrite("Rect.jpg",src2)
         
 if len(sys.argv) <=1:
     print "Error not flags: -c XN XP C -l C"
@@ -80,31 +89,49 @@ else:
     if sys.argv[1] == '-c':
         if sys.argv[2] == 'XN':
             XN = getX(fromFile = 0, positive= 0)
-            YN = np.zeros(shape=(4674,1), dtype = int)
+            rows, cols = XN.shape
+            YN = np.zeros(shape=(rows,1), dtype = int)
                     
         if sys.argv[2] == 'XP':
             XP = getX(fromFile = 0, positive= 1)
-            YP = np.ones(shape=(4963,1),dtype = int)
+            rows, cols = XP.shape
+            YP = np.ones(shape=(rows,1),dtype = int)
         if sys.argv[2] == 'rbf':
             FILE_NAME = 'Model/model8kRBF.sav'
             XN = getX(fromFile = 1, positive= 0)
-            YN = np.zeros(shape=(4674,1), dtype = int)
+            rows, cols = XN.shape
+            YN = np.zeros(shape=(rows,1), dtype = int)
             XP = getX(fromFile = 1, positive= 1)
-            YP = np.ones(shape=(4963,1),dtype = int)
+            rows, cols = XP.shape
+            YP = np.ones(shape=(rows,1),dtype = int)
             X = np.vstack((XP,XN))
             y = np.vstack((YP,YN))
             y = y.ravel()
             X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = sv.svm(X,y,'rbf')
             pickle.dump(classifier, open(FILE_NAME, 'wb'))
             train(classifier,standardScaler,std = 1)
-            
-            
+        if sys.argv[2] == 'rf':
+            FILE_NAME = 'Model/model8kRF.sav'
+            XN = getX(fromFile = 1, positive= 0)
+            rows, cols = XN.shape
+            YN = np.zeros(shape=(rows,1), dtype = int)
+            XP = getX(fromFile = 1, positive= 1)
+            rows, cols = XP.shape
+            YP = np.ones(shape=(rows,1),dtype = int)
+            X = np.vstack((XP,XN))
+            y = np.vstack((YP,YN))
+            y = y.ravel()
+            X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = sv.randomF(X,y,1000)
+            pickle.dump(classifier, open(FILE_NAME, 'wb'))
+            train(classifier,standardScaler,std = 1)
         if sys.argv[2] == 'linear':
             FILE_NAME = 'Model/model8kLinear.sav'
             XN = getX(fromFile = 1, positive= 0)
-            YN = np.zeros(shape=(4674,1), dtype = int)
+            rows, cols = XN.shape
+            YN = np.zeros(shape=(rows,1), dtype = int)
             XP = getX(fromFile = 1, positive= 1)
-            YP = np.ones(shape=(4963,1),dtype = int)
+            rows, cols = XP.shape
+            YP = np.ones(shape=(rows,1),dtype = int)
             X = np.vstack((XP,XN))
             y = np.vstack((YP,YN))
             y = y.ravel()
@@ -117,7 +144,7 @@ else:
             FILE_NAME = 'Model/model8kRBF.sav'
             classifier = pickle.load(open(FILE_NAME, 'rb'))
             VAR = "Data/positive2/"
-            NUM_OF_IMGS = 4964
+            NUM_OF_IMGS = NUM_OF_IMGS_P
             TYPEFILE = ".ppm"
             cont = 0
             for i in tqdm(range(1,NUM_OF_IMGS+1)):#13233
