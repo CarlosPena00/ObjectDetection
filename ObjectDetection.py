@@ -112,6 +112,7 @@ else:
             train(classifier,standardScaler,std = 1)
         if sys.argv[2] == 'rf':
             FILE_NAME = 'Model/model8kRF.sav'
+            FILE_NAME_SCALAR = 'Model/scalar8kRF.sav'
             XN = getX(fromFile = 1, positive= 0)
             rows, cols = XN.shape
             YN = np.zeros(shape=(rows,1), dtype = int)
@@ -121,8 +122,9 @@ else:
             X = np.vstack((XP,XN))
             y = np.vstack((YP,YN))
             y = y.ravel()
-            X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = sv.randomF(X,y,1000)
+            X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = sv.randomF(X,y,100)
             pickle.dump(classifier, open(FILE_NAME, 'wb'))
+            pickle.dump(standardScaler, open(FILE_NAME_SCALAR, 'wb'))
             train(classifier,standardScaler,std = 1)
         if sys.argv[2] == 'linear':
             FILE_NAME = 'Model/model8kLinear.sav'
@@ -153,3 +155,10 @@ else:
                 histG = HOG.getHistogramOfGradients(src)            
                 cont += classifier.predict(histG)
             print float(cont)/NUM_OF_IMGS
+        if sys.argv[2] == 'rf':
+            FILE_NAME = 'Model/model8kRF.sav'
+            FILE_NAME_SCALAR = 'Model/scalar8kRF.sav'
+            classifier = pickle.load(open(FILE_NAME, 'rb'))
+            standardScaler = pickle.load(open(FILE_NAME_SCALAR, 'rb'))
+            train(classifier,standardScaler,std = 1)
+
