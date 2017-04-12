@@ -56,17 +56,24 @@ def train(classifier,stdScaler, std = 0):
         VAR = "Example/test"
         TYPEFILE = ".jpg"
         src = cv2.imread(VAR+TYPEFILE)
-        srcUp = cv2.pyrUp(src)
+        srcUp = src#cv2.pyrUp(src)
         rows,cols,channel = src.shape
-        for j in range(0,rows/86):
-            for i in range(0, cols/86):
-                roi = HOG.getROIsrc(srcUp,j,i,px = 86)
-                histG = HOG.getHistogramOfGradients(roi)
-                histGE = stdScaler.transform(histG)
-                if classifier.predict(histGE):
-                    plt.imshow(cv2.cvtColor(roi,cv2.COLOR_BGR2RGB))
-                    plt.savefig(str(j)+str(i)+".jpg")
-
+        maxRows = rows/86
+        maxCols = cols/86
+        for j in tqdm(range(0,maxRows)):
+            for i in range(0, maxCols):
+                for dY in range(0,3):
+                    for dX in range(0,3):                                
+                        roi = HOG.getROIsrc(srcUp,j,i,px = 86,dy = dY*20, dx = dX*20)
+                        rows,cols,channel = roi.shape
+                        if rows != 86 or cols != 86:
+                            roi = cv2.resize(roi,(86,86))
+                        histG = HOG.getHistogramOfGradients(roi)
+                        histGE = stdScaler.transform(histG)
+                        if classifier.predict(histGE):
+                            plt.imshow(cv2.cvtColor(roi,cv2.COLOR_BGR2RGB))
+                            plt.savefig(str(j*1000)+str(i*100)+str(dY*10)+str(dX)+"Foi"+".jpg")
+        
 if len(sys.argv) <=1:
     print "Error not flags: -c XN XP C -l C"
 else:
@@ -112,9 +119,10 @@ else:
             VAR = "Data/positive2/"
             NUM_OF_IMGS = 4964
             TYPEFILE = ".ppm"
+            cont = 0
             for i in tqdm(range(1,NUM_OF_IMGS+1)):#13233
                 src = cv2.imread(VAR+str(i)+TYPEFILE)
                 src = cv2.resize(src,(86,86))
                 histG = HOG.getHistogramOfGradients(src)            
-                print classifier.predict(histG)
-
+                cont += classifier.predict(histG)
+            print float(cont)/NUM_OF_IMGS

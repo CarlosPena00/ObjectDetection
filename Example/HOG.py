@@ -18,8 +18,8 @@ def getROI(gMag,gDir, idY, idX = 0 ,px = 8 ):
 #idY index of the block/cell
 #idX index of the block/cell
 #px shape of the block/cell (px,px,;)
-def getROIsrc(src,idY,idX, px = 8):
-    return src[(px+(idX-1)*px):(px+idX*px) ,  (px+(idY-1)*px):(px+idY*px), :]
+def getROIsrc(src,idY,idX, px = 8, dy=0,dx=0):
+    return src[(dx+px+(idX-1)*px):(dx+px+idX*px) ,  (dy+px+(idY-1)*px):(dy+px+idY*px), :]
     
 ##cart2Polar return gradientMagnitude,gradientDirection of a img
 #src input matrix
