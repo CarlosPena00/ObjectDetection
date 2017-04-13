@@ -15,14 +15,13 @@ def svm (X,y,Kernel = 'linear'):
     sc_X = StandardScaler()
     X_train = sc_X.fit_transform(X_train)
     X_test = sc_X.transform(X_test)
-    print "PARAM> : "
-    print sc_X.get_params() 
     classifier = SVC(kernel = Kernel)
     # Kernel cam be linear, poly, rbf, sigmoid
     classifier.fit(X_train,y_train)
     y_pred = classifier.predict(X_test)
     cm = confusion_matrix(y_test,y_pred)
     print cm
+    print (cm[0,0]+cm[1,1])/float(cm.sum())
     return X_train,X_test,y_train,y_test,y_pred,classifier,cm,sc_X
 
 def randomF(X,y, N = 100):
@@ -30,12 +29,16 @@ def randomF(X,y, N = 100):
     sc_X = StandardScaler()
     X_train = sc_X.fit_transform(X_train)
     X_test = sc_X.transform(X_test)
-    classifier = RandomForestClassifier(n_estimators=N,n_jobs=-1,criterion='entropy')
+    classifier = RandomForestClassifier(n_estimators=N,n_jobs=4,criterion='entropy')
     classifier.fit(X_train,y_train)
     y_pred = classifier.predict(X_test)
     cm = confusion_matrix(y_test,y_pred)
     print cm
+    print (cm[0,0]+cm[1,1])/float(cm.sum())
+    
     return X_train,X_test,y_train,y_test,y_pred,classifier,cm,sc_X
+
+
 """   
     false_positive_rate, true_positive_rate, thresholds = roc_curve(y_test, y_pred)
     roc_auc = auc(false_positive_rate, true_positive_rate)
