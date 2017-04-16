@@ -14,23 +14,25 @@ import svm as sv
 NUM_OF_IMGS_P = 13233#4964
 NUM_OF_IMGS_N = 4684
 #Input will be (86,86,?)
-def getX(fromFile = 0,positive = 1, files = 1 , idT = 0):
+def getX(fromFile = 0,positive = 1, files = 1 , idT = 0, save = 0):
 
     if positive == 1:
         VAR = "Data/positive3/"
-        CSV = "CSV/Positive_Samples2.csv"
+        SAVE= "Data/positive4/"
+        CSV = "CSV/Positive_Samples.csv"
         NUM_OF_IMGS = NUM_OF_IMGS_P
         TYPEFILE = ".jpg"
     else:
         VAR = "Data/negative2/"
-        CSV = "CSV/Negative_Samples3.csv"
+        SAVE= "Data/negative3/"
+        CSV = "CSV/Negative_Samples4.csv"
         NUM_OF_IMGS = NUM_OF_IMGS_N
         TYPEFILE = ".JPEG"
     if fromFile == 0:        
         lista = np.empty([1,2916])
-        for i in tqdm(range(1,NUM_OF_IMGS+1)):#13233
+        for f in tqdm(range(1,NUM_OF_IMGS+1)):#13233
             #Full image set (already cut, in ratio 1:1)
-            src = cv2.imread(VAR+str(i)+TYPEFILE)
+            src = cv2.imread(VAR+str(f)+TYPEFILE)
             rows,cols,channel = src.shape 
             if rows > 1 and cols > 1:
                 maxRows = rows/86
@@ -41,6 +43,7 @@ def getX(fromFile = 0,positive = 1, files = 1 , idT = 0):
                         rowsR,colsR,channel = roi.shape
                         if rowsR != 86 or colsR != 86:
                             roi = cv2.resize(roi,(86,86))
+                        cv2.imwrite(SAVE+str(f)+"j"+str(j)+"i"+str(i)+TYPEFILE,roi)
                         histG = HOG.getHistogramOfGradients(roi)
                         lista = np.vstack((lista,histG))
             else:
@@ -66,12 +69,13 @@ def train(classifier,stdScaler, std = 0):
             histGE = stdScaler.transform(histG)
             print classifier.predict(histGE)
     else:
-        VAR = "Example/test"
+        VAR = "Example/test6"
         TYPEFILE = ".jpg"
         src = cv2.imread(VAR+TYPEFILE)
         src2 = src.copy()
-        srcUp = src#cv2.pyrUp(src)
+        srcUp = cv2.pyrDown(src)
         rows,cols,channel = src.shape
+        
         maxRows = rows/86
         maxCols = cols/86
         for j in tqdm(range(0,maxRows)):
@@ -80,6 +84,8 @@ def train(classifier,stdScaler, std = 0):
                     for dX in range(0,3):                                
                         roi = HOG.getROIsrc(srcUp,j,i,px = 86,dy = dY*20, dx = dX*20)
                         rows,cols,channel = roi.shape
+                        if rows == 0 or cols == 0:
+                            break
                         if rows != 86 or cols != 86:
                             roi = cv2.resize(roi,(86,86))
                         histG = HOG.getHistogramOfGradients(roi)
@@ -136,9 +142,9 @@ else:
             FILE_NAME_SCALAR = 'Model/scalar8kRBF.sav'
             X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = sv.svm(X,y,'rbf')
         if sys.argv[2] == 'rf':
-            FILE_NAME = 'Model/model8kRF.sav'
-            FILE_NAME_SCALAR = 'Model/scalar8kRF.sav'
-            X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = sv.randomF(X,y,100)
+            FILE_NAME = 'Model/model50kRF.sav'
+            FILE_NAME_SCALAR = 'Model/scalar50kRF.sav'
+            X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = sv.randomF(X,y,1000)
         if sys.argv[2] == 'linear':
             FILE_NAME = 'Model/model8kLinear.sav'
             FILE_NAME_SCALAR = 'Model/scalar8kLinear.sav'
@@ -163,5 +169,4 @@ else:
         standardScaler = pickle.load(open(FILE_NAME_SCALAR, 'rb'))
         train(classifier,standardScaler,std = 1)
 
-Xum = getX(fromFile=1, positive = 1)
-Xdois = getX(fromFile=1, positive = 1)
+
