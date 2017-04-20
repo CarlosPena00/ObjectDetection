@@ -11,15 +11,15 @@ sys.path.insert(0, 'Example')
 import HOG as HOG
 import svm as sv
 
-NUM_OF_IMGS_P = 13233#4964
+NUM_OF_IMGS_P = 26466#13233#4964
 NUM_OF_IMGS_N = 4684
 #Input will be (86,86,?)
 def getX(fromFile = 0,positive = 1, files = 1 , idT = 0, save = 0):
 
     if positive == 1:
-        VAR = "Data/positive3/"
+        VAR = "Data/temp/"
         SAVE= "Data/positive4/"
-        CSV = "CSV/Positive_Samples.csv"
+        CSV = "CSV/Positive_SamplesN.csv"
         NUM_OF_IMGS = NUM_OF_IMGS_P
         TYPEFILE = ".jpg"
     else:
@@ -39,7 +39,7 @@ def getX(fromFile = 0,positive = 1, files = 1 , idT = 0, save = 0):
                 maxCols = cols/86
                 for j in range(0,maxRows):
                     for i in range(0, maxCols):
-                        roi = HOG.getROIsrc(src,i,j,px = 86)
+                        roi,xMin,xMax,yMin,yMax = HOG.getROIsrc(src,i,j,px = 86)
                         rowsR,colsR,channel = roi.shape
                         if rowsR != 86 or colsR != 86:
                             roi = cv2.resize(roi,(86,86))
@@ -51,7 +51,7 @@ def getX(fromFile = 0,positive = 1, files = 1 , idT = 0, save = 0):
                 lista = np.vstack((lista,histG))     
            
         X = np.delete(lista,(0),axis=0)
-        np.savetxt(CSV,X,delimiter= ",",fmt="%.2f")
+        np.savetxt(CSV,X,delimiter= ",",fmt="%.4f")
     else:
         dataset = pd.read_csv(CSV)
         X = dataset.iloc[:,:].values
@@ -69,20 +69,21 @@ def train(classifier,stdScaler, std = 0):
             histGE = stdScaler.transform(histG)
             print classifier.predict(histGE)
     else:
-        VAR = "Example/test6"
+        VAR = "Example/test"
         TYPEFILE = ".jpg"
         src = cv2.imread(VAR+TYPEFILE)
-        src2 = src.copy()
-        srcUp = cv2.pyrDown(src)
-        rows,cols,channel = src.shape
-        
+
+        srcUp = src#cv2.pyrDown(src)
+
+        rows,cols,channel = srcUp.shape
+        src2 = srcUp.copy()
         maxRows = rows/86
         maxCols = cols/86
         for j in tqdm(range(0,maxRows)):
             for i in range(0, maxCols):
                 for dY in range(0,3):
                     for dX in range(0,3):                                
-                        roi = HOG.getROIsrc(srcUp,j,i,px = 86,dy = dY*20, dx = dX*20)
+                        roi,xMin,xMax,yMin,yMax = HOG.getROIsrc(srcUp,j,i,px = 86,dy = dY*20, dx = dX*20)
                         rows,cols,channel = roi.shape
                         if rows == 0 or cols == 0:
                             break
@@ -91,7 +92,7 @@ def train(classifier,stdScaler, std = 0):
                         histG = HOG.getHistogramOfGradients(roi)
                         histGE = stdScaler.transform(histG)
                         if classifier.predict(histGE):
-                            cv2.rectangle(src2,((dX*20+86+(i-1)*86),(dY*20+86+(j-1)*86)),((dX*20+86+i*86),(dY*20+86+j*86)),(0,0,255))
+                            cv2.rectangle(src2,(yMin,xMin),(yMax,xMax),(0,0,255))
                             plt.imshow(cv2.cvtColor(roi,cv2.COLOR_BGR2RGB))
                             cv2.imwrite("Img/"+str(j*1000)+str(i*100)+str(dY*10)+str(dX)+"Foi"+".jpg",roi)
         cv2.imwrite("Rect.jpg",src2)
@@ -105,7 +106,7 @@ def cutPositiveImg():
         src = cv2.imread(VAR+str(i)+TYPEFILE)
         rows,cols,channel = src.shape
         if cols == 250 and rows == 250:
-            cutImg = HOG.getROIsrc(src,0,0,px = 180,dx = 35,dy = 35)
+            cutImg,xMin,xMax,yMin,yMax = HOG.getROIsrc(src,0,0,px = 180,dx = 35,dy = 35)
             resizeImg = cv2.resize(cutImg,(86,86))
             cv2.imwrite(SAVE+str(i)+TYPEFILE,resizeImg)
             
@@ -125,11 +126,12 @@ else:
             rows, cols = XP.shape
             YP = np.ones(shape=(rows,1),dtype = int)
     if sys.argv[1] == '-c':
-        
+        print "------Getting Negative Samples from File------"
         XN = getX(fromFile = 1, positive= 0)
         rowsN, colsN = XN.shape
         YN = np.zeros(shape=(rowsN,1), dtype = int)
         
+        print "------Getting Positive Samples from File------"
         XP = getX(fromFile = 1, positive= 1)
         rowsP, colsP = XP.shape
         YP = np.ones(shape=(rowsP,1),dtype = int)
@@ -137,6 +139,8 @@ else:
         X = np.vstack((XP,XN))
         y = np.vstack((YP,YN))
         y = y.ravel()
+
+        print "---------------Start The Model----------------"
         if sys.argv[2] == 'rbf':
             FILE_NAME = 'Model/model8kRBF.sav'
             FILE_NAME_SCALAR = 'Model/scalar8kRBF.sav'
@@ -149,8 +153,12 @@ else:
             FILE_NAME = 'Model/model8kLinear.sav'
             FILE_NAME_SCALAR = 'Model/scalar8kLinear.sav'
             X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = sv.svm(X,y,'linear')
+        
+        print "-----------------Save The Model---------------"
         pickle.dump(classifier, open(FILE_NAME, 'wb'))
         pickle.dump(standardScaler, open(FILE_NAME_SCALAR, 'wb'))
+        
+        print "-----------------Train The Model--------------"
         train(classifier,standardScaler,std = 1)
             
             
