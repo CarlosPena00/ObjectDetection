@@ -14,6 +14,27 @@ import svm as sv
 NUM_OF_IMGS_P = 26466#13233#4964
 NUM_OF_IMGS_N = 4684
 #Input will be (86,86,?)
+NumberOfDim = 2916
+
+
+
+def mergeX(positive = 1):
+    files2Merge = "list.txt"
+    if positive == 1:
+        CSV = "CSV/Positive/"
+    else:
+        CSV = "CSV/Negative/"
+    concatList = CSV+files2Merge 
+    dataList = pd.read_csv(concatList).iloc[:,:].values
+    xList = np.empty([1,NumberOfDim])
+    for folder in dataList:
+        print "----- Start To Get Folder "+CSV+folder+" -----"
+        dataset = pd.read_csv(CSV+folder[0])
+        xNew = dataset.iloc[:,:].values
+        xList = np.vstack((xList,xNew))
+    return xList
+
+
 def getX(fromFile = 0,positive = 1, files = 1 , idT = 0, save = 0):
 
     if positive == 1:
@@ -51,7 +72,7 @@ def getX(fromFile = 0,positive = 1, files = 1 , idT = 0, save = 0):
                 lista = np.vstack((lista,histG))     
            
         X = np.delete(lista,(0),axis=0)
-        np.savetxt(CSV,X,delimiter= ",",fmt="%.4f")
+        np.savetxt(CSV,X,delimiter= ",",fmt="%f")
     else:
         dataset = pd.read_csv(CSV)
         X = dataset.iloc[:,:].values
