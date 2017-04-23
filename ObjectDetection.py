@@ -26,12 +26,13 @@ def mergeX(positive = 1):
         CSV = "CSV/Negative/"
     concatList = CSV+files2Merge 
     dataList = pd.read_csv(concatList).iloc[:,:].values
-    xList = np.empty([1,NumberOfDim])
+    xList = np.empty([1,NumberOfDim],dtype="float32")
     for folder in dataList:
         print "----- Start To Get Folder "+CSV+folder+" -----"
-        dataset = pd.read_csv(CSV+folder[0])
+        dataset = pd.read_csv(CSV+folder[0],dtype="float32")
         xNew = dataset.iloc[:,:].values
         xList = np.vstack((xList,xNew))
+    xList = np.delete(xList,(0),axis=0)
     return xList
 
 
