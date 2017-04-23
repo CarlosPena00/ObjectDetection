@@ -10,7 +10,7 @@ from tqdm import tqdm
 sys.path.insert(0, 'Example')
 import HOG as HOG
 import svm as sv
-
+from random import randint
 NUM_OF_IMGS_P = 26466#13233#4964
 NUM_OF_IMGS_N = 4684
 #Input will be (86,86,?)
@@ -80,6 +80,7 @@ def getX(fromFile = 0,positive = 1, files = 1 , idT = 0, save = 0):
     return X
 
 def train(classifier,stdScaler, std = 0):
+    ID = randint(0,99999)
     if std == 0:
         VAR = "Data/positive2/"
         NUM_OF_IMGS = NUM_OF_IMGS_P
@@ -91,12 +92,10 @@ def train(classifier,stdScaler, std = 0):
             histGE = stdScaler.transform(histG)
             print classifier.predict(histGE)
     else:
-        VAR = "Example/test"
         TYPEFILE = ".jpg"
-        src = cv2.imread(VAR+TYPEFILE)
-
+        DIRECTORY = "Example/test"
+        src = cv2.imread(DIRECTORY+TYPEFILE)
         srcUp = src#cv2.pyrDown(src)
-
         rows,cols,channel = srcUp.shape
         src2 = srcUp.copy()
         maxRows = rows/86
@@ -116,8 +115,8 @@ def train(classifier,stdScaler, std = 0):
                         if classifier.predict(histGE):
                             cv2.rectangle(src2,(yMin,xMin),(yMax,xMax),(0,0,255))
                             plt.imshow(cv2.cvtColor(roi,cv2.COLOR_BGR2RGB))
-                            cv2.imwrite("Img/"+str(j*1000)+str(i*100)+str(dY*10)+str(dX)+"Foi"+".jpg",roi)
-        cv2.imwrite("Rect.jpg",src2)
+                            cv2.imwrite("Img/"+"ID"+str(ID)+str(j*1000)+str(i*100)+str(dY*10)+str(dX)+"Foi"+".jpg",roi)
+        cv2.imwrite("ID"+str(ID)+"Rect.jpg",src2)
         
 def cutPositiveImg():
     VAR = "Data/positive/"
@@ -149,12 +148,12 @@ else:
             YP = np.ones(shape=(rows,1),dtype = int)
     if sys.argv[1] == '-c':
         print "------Getting Negative Samples from File------"
-        XN = getX(fromFile = 1, positive= 0)
+        XN = mergeX(positive= 0)
         rowsN, colsN = XN.shape
         YN = np.zeros(shape=(rowsN,1), dtype = int)
         
         print "------Getting Positive Samples from File------"
-        XP = getX(fromFile = 1, positive= 1)
+        XP = mergeX(positive= 1)
         rowsP, colsP = XP.shape
         YP = np.ones(shape=(rowsP,1),dtype = int)
         
@@ -168,9 +167,9 @@ else:
             FILE_NAME_SCALAR = 'Model/scalar8kRBF.sav'
             X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = sv.svm(X,y,'rbf')
         if sys.argv[2] == 'rf':
-            FILE_NAME = 'Model/model50kRF.sav'
-            FILE_NAME_SCALAR = 'Model/scalar50kRF.sav'
-            X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = sv.randomF(X,y,1000)
+            FILE_NAME = 'Model/modelALLkRF.sav'
+            FILE_NAME_SCALAR = 'Model/scalarALLkRF.sav'
+            X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = sv.randomF(X,y,100)
         if sys.argv[2] == 'linear':
             FILE_NAME = 'Model/model8kLinear.sav'
             FILE_NAME_SCALAR = 'Model/scalar8kLinear.sav'
@@ -189,8 +188,8 @@ else:
             FILE_NAME = 'Model/model8kRBF.sav'
             FILE_NAME_SCALAR = 'Model/scalar8kRBF.sav'
         if sys.argv[2] == 'rf':
-            FILE_NAME = 'Model/model8kRF.sav'
-            FILE_NAME_SCALAR = 'Model/scalar8kRF.sav'
+            FILE_NAME = 'Model/modelALLkRF.sav'
+            FILE_NAME_SCALAR = 'Model/scalarALLkRF.sav'
         if sys.argv[2] == 'linear':
             FILE_NAME = 'Model/model8kLinear.sav'
             FILE_NAME_SCALAR = 'Model/scalar8kLinear.sav'
