@@ -1,4 +1,4 @@
-#ObjectDetection
+# ObjectDetection
 import cv2
 import numpy as np
 import pandas as pd
@@ -7,31 +7,30 @@ import matplotlib.pyplot as plt
 import pickle
 import sys
 from tqdm import tqdm
+from random import randint
 sys.path.insert(0, 'Example')
 import HOG as HOG
 import svm as sv
-from random import randint
-NUM_OF_IMGS_P = 26466#13233#4964
+NUM_OF_IMGS_P = 26466  # 13233#4964
 NUM_OF_IMGS_N = 4684
-#Input will be (86,86,?)
+# Input will be (86,86,?)
 NumberOfDim = 2916
 
 
-
-def mergeX(positive = 1):
+def mergeX(positive=1):
     files2Merge = "list.txt"
     if positive == 1:
         CSV = "CSV/Positive/"
     else:
         CSV = "CSV/Negative/"
-    concatList = CSV+files2Merge 
-    dataList = pd.read_csv(concatList).iloc[:,:].values
-    xList = np.empty([1,NumberOfDim],dtype="float32")
+    concatList = CSV + files2Merge
+    dataList = pd.read_csv(concatList).iloc[:, :].values
+    xList = np.empty([1, NumberOfDim], dtype="float32")
     for folder in dataList:
-        print "----- Start To Get Folder "+CSV+folder+" -----"
-        dataset = pd.read_csv(CSV+folder[0],dtype="float32")
-        xNew = dataset.iloc[:,:].values
-        xList = np.vstack((xList,xNew))
+        print "----- Start To Get Folder " + CSV + folder + " -----"
+        dataset = pd.read_csv(CSV+folder[0], dtype="float32")
+        xNew = dataset.iloc[:, :].values
+        xList = np.vstack((xList, xNew))
     xList = np.delete(xList,(0),axis=0)
     return xList
 
@@ -50,74 +49,76 @@ def getX(fromFile = 0,positive = 1, files = 1 , idT = 0, save = 0):
         CSV = "CSV/Negative_Samples4.csv"
         NUM_OF_IMGS = NUM_OF_IMGS_N
         TYPEFILE = ".JPEG"
-    if fromFile == 0:        
-        lista = np.empty([1,2916])
-        for f in tqdm(range(1,NUM_OF_IMGS+1)):#13233
-            #Full image set (already cut, in ratio 1:1)
-            src = cv2.imread(VAR+str(f)+TYPEFILE)
-            rows,cols,channel = src.shape 
+    if fromFile == 0:
+        lista = np.empty([1, 2916])
+        for f in tqdm(range(1, NUM_OF_IMGS + 1)):  # 13233
+            # Full image set (already cut, in ratio 1:1)
+            src = cv2.imread(VAR + str(f) + TYPEFILE)
+            rows, cols, channel = src.shape 
             if rows > 1 and cols > 1:
-                maxRows = rows/86
-                maxCols = cols/86
-                for j in range(0,maxRows):
+                maxRows = rows / 86
+                maxCols = cols / 86
+                for j in range(0, maxRows):
                     for i in range(0, maxCols):
                         roi,xMin,xMax,yMin,yMax = HOG.getROIsrc(src,i,j,px = 86)
                         rowsR,colsR,channel = roi.shape
                         if rowsR != 86 or colsR != 86:
-                            roi = cv2.resize(roi,(86,86))
+                            roi = cv2.resize(roi, (86, 86))
                         cv2.imwrite(SAVE+str(f)+"j"+str(j)+"i"+str(i)+TYPEFILE,roi)
                         histG = HOG.getHistogramOfGradients(roi)
-                        lista = np.vstack((lista,histG))
+                        lista = np.vstack((lista, histG))
             else:
                 histG = np.zeros(2916)
-                lista = np.vstack((lista,histG))     
-           
-        X = np.delete(lista,(0),axis=0)
-        np.savetxt(CSV,X,delimiter= ",",fmt="%f")
+                lista = np.vstack((lista, histG))     
+        X = np.delete(lista, (0), axis=0)
+        np.savetxt(CSV, X, delimiter=",", fmt="%f")
     else:
         dataset = pd.read_csv(CSV)
-        X = dataset.iloc[:,:].values
+        X = dataset.iloc[:, :].values
     return X
 
-def train(classifier,stdScaler, std = 0):
-    ID = randint(0,99999)
+
+def train(classifier, stdScaler, std=0):
+    ID = randint(0, 99999)
     if std == 0:
         VAR = "Data/positive2/"
         NUM_OF_IMGS = NUM_OF_IMGS_P
         TYPEFILE = ".ppm"
-        for i in tqdm(range(1,NUM_OF_IMGS+1)):#13233
-            src = cv2.imread(VAR+str(i)+TYPEFILE)
-            src = cv2.resize(src,(86,86))
-            histG = HOG.getHistogramOfGradients(src)          
+        for i in tqdm(range(1, NUM_OF_IMGS + 1)):  # 13233
+            src = cv2.imread(VAR + str(i) + TYPEFILE)
+            src = cv2.resize(src, (86, 86))
+            histG = HOG.getHistogramOfGradients(src)
             histGE = stdScaler.transform(histG)
             print classifier.predict(histGE)
     else:
         TYPEFILE = ".jpg"
         DIRECTORY = "Example/test"
-        src = cv2.imread(DIRECTORY+TYPEFILE)
-        srcUp = src#cv2.pyrDown(src)
-        rows,cols,channel = srcUp.shape
+        src = cv2.imread(DIRECTORY + TYPEFILE)
+        srcUp = src  # cv2.pyrDown(src)
+        rows, cols, channel = srcUp.shape
         src2 = srcUp.copy()
-        maxRows = rows/86
-        maxCols = cols/86
-        for j in tqdm(range(0,maxRows)):
+        maxRows = rows / 86
+        maxCols = cols / 86
+        for j in tqdm(range(0, maxRows)):
             for i in range(0, maxCols):
-                for dY in range(0,3):
-                    for dX in range(0,3):                                
+                for dY in range(0, 3):
+                    for dX in range(0, 3):
                         roi,xMin,xMax,yMin,yMax = HOG.getROIsrc(srcUp,j,i,px = 86,dy = dY*20, dx = dX*20)
-                        rows,cols,channel = roi.shape
+                        rows, cols, channel = roi.shape
                         if rows == 0 or cols == 0:
                             break
                         if rows != 86 or cols != 86:
-                            roi = cv2.resize(roi,(86,86))
+                            roi = cv2.resize(roi, (86, 86))
                         histG = HOG.getHistogramOfGradients(roi)
                         histGE = stdScaler.transform(histG)
                         if classifier.predict(histGE):
-                            cv2.rectangle(src2,(yMin,xMin),(yMax,xMax),(0,0,255))
-                            plt.imshow(cv2.cvtColor(roi,cv2.COLOR_BGR2RGB))
+                            cv2.rectangle(src2, (yMin, xMin), (yMax, xMax), (0, 0, 255))
+                            plt.imshow(cv2.cvtColor(roi, cv2.COLOR_BGR2RGB))
                             cv2.imwrite("Img/"+"ID"+str(ID)+str(j*1000)+str(i*100)+str(dY*10)+str(dX)+"Foi"+".jpg",roi)
-        cv2.imwrite("ID"+str(ID)+"Rect.jpg",src2)
-        
+        cv2.imwrite("ID" + str(ID) + "Rect.jpg", src2)
+        print "The ID: " + str(ID)
+
+
 def cutPositiveImg():
     VAR = "Data/positive/"
     SAVE = "Data/positive3/"
@@ -167,35 +168,31 @@ else:
             FILE_NAME_SCALAR = 'Model/scalar8kRBF.sav'
             X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = sv.svm(X,y,'rbf')
         if sys.argv[2] == 'rf':
-            FILE_NAME = 'Model/modelALLkRF.sav'
-            FILE_NAME_SCALAR = 'Model/scalarALLkRF.sav'
+            FILE_NAME = 'Model/modelTkRF.sav'
+            FILE_NAME_SCALAR = 'Model/scalarTkRF.sav'
             X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = sv.randomF(X,y,100)
         if sys.argv[2] == 'linear':
-            FILE_NAME = 'Model/model8kLinear.sav'
-            FILE_NAME_SCALAR = 'Model/scalar8kLinear.sav'
+            FILE_NAME = 'Model/modelALLLinear.sav'
+            FILE_NAME_SCALAR = 'Model/scalarALLLinear.sav'
             X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = sv.svm(X,y,'linear')
-        
+
         print "-----------------Save The Model---------------"
         pickle.dump(classifier, open(FILE_NAME, 'wb'))
         pickle.dump(standardScaler, open(FILE_NAME_SCALAR, 'wb'))
-        
+
         print "-----------------Train The Model--------------"
-        train(classifier,standardScaler,std = 1)
-            
-            
+        train(classifier, standardScaler, std=1)
+
     if sys.argv[1] == '-l':
         if sys.argv[2] == 'rbf':
             FILE_NAME = 'Model/model8kRBF.sav'
             FILE_NAME_SCALAR = 'Model/scalar8kRBF.sav'
         if sys.argv[2] == 'rf':
-            FILE_NAME = 'Model/modelALLkRF.sav'
-            FILE_NAME_SCALAR = 'Model/scalarALLkRF.sav'
+            FILE_NAME = 'Model/modelTkRF.sav'
+            FILE_NAME_SCALAR = 'Model/scalarTkRF.sav'
         if sys.argv[2] == 'linear':
             FILE_NAME = 'Model/model8kLinear.sav'
             FILE_NAME_SCALAR = 'Model/scalar8kLinear.sav'
-            
         classifier = pickle.load(open(FILE_NAME, 'rb'))
         standardScaler = pickle.load(open(FILE_NAME_SCALAR, 'rb'))
-        train(classifier,standardScaler,std = 1)
-
-
+        train(classifier, standardScaler, std=1)

@@ -15,7 +15,8 @@ sys.path.insert(0, 'Example')
 import HOG as HOG
 import time
 
-def folds2Hog(fromFile = 0,positive = 1, argMin = 0, argMax = 100):
+
+def folds2Hog(fromFile=0, positive=1, argMin=0, argMax=100):
     DATAFOLDER = "Data/"
     CSVFOLDER = "CSV/"
     if positive == 0 and fromFile == 0:
@@ -25,9 +26,9 @@ def folds2Hog(fromFile = 0,positive = 1, argMin = 0, argMax = 100):
         CSVFOLDER += "Positive/"
         data = pd.read_csv("Data/positiveList.csv")
 
-    foldName = data.iloc[:,:].values
-    minIndex = max(argMin,0)
-    maxIndex = min(foldName.shape[0],argMax)
+    foldName = data.iloc[:, :].values
+    minIndex = max(argMin, 0)
+    maxIndex = min(foldName.shape[0], argMax)
     for i in range(minIndex,maxIndex):
         FOLDER = foldName[i][0]      
         TYPEFILE = "."+foldName[i][1]
