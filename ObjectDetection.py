@@ -28,24 +28,23 @@ def mergeX(positive=1):
     xList = np.empty([1, NumberOfDim], dtype="float32")
     for folder in dataList:
         print "----- Start To Get Folder " + CSV + folder + " -----"
-        dataset = pd.read_csv(CSV+folder[0], dtype="float32")
+        dataset = pd.read_csv(CSV + folder[0], dtype="float32")
         xNew = dataset.iloc[:, :].values
         xList = np.vstack((xList, xNew))
-    xList = np.delete(xList,(0),axis=0)
+    xList = np.delete(xList, (0), axis=0)
     return xList
 
 
-def getX(fromFile = 0,positive = 1, files = 1 , idT = 0, save = 0):
-
+def getX(fromFile=0, positive=1, files=1, idT=0, save=0):
     if positive == 1:
         VAR = "Data/temp/"
-        SAVE= "Data/positive4/"
+        SAVE = "Data/positive4/"
         CSV = "CSV/Positive_SamplesN.csv"
         NUM_OF_IMGS = NUM_OF_IMGS_P
         TYPEFILE = ".jpg"
     else:
         VAR = "Data/negative2/"
-        SAVE= "Data/negative3/"
+        SAVE = "Data/negative3/"
         CSV = "CSV/Negative_Samples4.csv"
         NUM_OF_IMGS = NUM_OF_IMGS_N
         TYPEFILE = ".JPEG"
@@ -54,22 +53,22 @@ def getX(fromFile = 0,positive = 1, files = 1 , idT = 0, save = 0):
         for f in tqdm(range(1, NUM_OF_IMGS + 1)):  # 13233
             # Full image set (already cut, in ratio 1:1)
             src = cv2.imread(VAR + str(f) + TYPEFILE)
-            rows, cols, channel = src.shape 
+            rows, cols, channel = src.shape
             if rows > 1 and cols > 1:
                 maxRows = rows / 86
                 maxCols = cols / 86
                 for j in range(0, maxRows):
                     for i in range(0, maxCols):
-                        roi,xMin,xMax,yMin,yMax = HOG.getROIsrc(src,i,j,px = 86)
-                        rowsR,colsR,channel = roi.shape
+                        roi, xMin, xMax, yMin, yMax = HOG.getROIsrc(src, i, j, px=86)
+                        rowsR, colsR, channel = roi.shape
                         if rowsR != 86 or colsR != 86:
                             roi = cv2.resize(roi, (86, 86))
-                        cv2.imwrite(SAVE+str(f)+"j"+str(j)+"i"+str(i)+TYPEFILE,roi)
+                        cv2.imwrite(SAVE + str(f) + "j" + str(j) + "i" + str(i) + TYPEFILE, roi)
                         histG = HOG.getHistogramOfGradients(roi)
                         lista = np.vstack((lista, histG))
             else:
                 histG = np.zeros(2916)
-                lista = np.vstack((lista, histG))     
+                lista = np.vstack((lista, histG))
         X = np.delete(lista, (0), axis=0)
         np.savetxt(CSV, X, delimiter=",", fmt="%f")
     else:
@@ -103,7 +102,7 @@ def train(classifier, stdScaler, std=0):
             for i in range(0, maxCols):
                 for dY in range(0, 3):
                     for dX in range(0, 3):
-                        roi,xMin,xMax,yMin,yMax = HOG.getROIsrc(srcUp,j,i,px = 86,dy = dY*20, dx = dX*20)
+                        roi, xMin, xMax, yMin, yMax = HOG.getROIsrc(srcUp, j, i, px=86, dy=dY*20, dx=dX*20)
                         rows, cols, channel = roi.shape
                         if rows == 0 or cols == 0:
                             break
@@ -124,57 +123,54 @@ def cutPositiveImg():
     SAVE = "Data/positive3/"
     NUM_OF_IMGS_TO_CUT = 13233
     TYPEFILE = ".jpg"
-    for i in tqdm(range(1, NUM_OF_IMGS_TO_CUT+1)):
-        src = cv2.imread(VAR+str(i)+TYPEFILE)
-        rows,cols,channel = src.shape
+    for i in tqdm(range(1, NUM_OF_IMGS_TO_CUT + 1)):
+        src = cv2.imread(VAR + str(i) + TYPEFILE)
+        rows, cols, channel = src.shape
         if cols == 250 and rows == 250:
-            cutImg,xMin,xMax,yMin,yMax = HOG.getROIsrc(src,0,0,px = 180,dx = 35,dy = 35)
-            resizeImg = cv2.resize(cutImg,(86,86))
-            cv2.imwrite(SAVE+str(i)+TYPEFILE,resizeImg)
-            
-        
-        
-if len(sys.argv) <=1:
+            cutImg, xMin, xMax, yMin, yMax = HOG.getROIsrc(
+                src, 0, 0, px=180, dx=35, dy=35)
+            resizeImg = cv2.resize(cutImg, (86, 86))
+            cv2.imwrite(SAVE + str(i) + TYPEFILE, resizeImg)
+
+
+if len(sys.argv) <= 1:
     print "Error not flags: -x n p || -c rbf rf linear || -l rbf rf linear"
 else:
     if sys.argv[1] == '-x':
         if sys.argv[2] == 'n':
-            XN = getX(fromFile = 0, positive= 0)
+            XN = getX(fromFile=0, positive=0)
             rows, cols = XN.shape
-            YN = np.zeros(shape=(rows,1), dtype = int)
-                    
+            YN = np.zeros(shape=(rows, 1), dtype=int)
         if sys.argv[2] == 'p':
-            XP = getX(fromFile = 0, positive= 1)
+            XP = getX(fromFile=0, positive=1)
             rows, cols = XP.shape
-            YP = np.ones(shape=(rows,1),dtype = int)
+            YP = np.ones(shape=(rows, 1), dtype=int)
     if sys.argv[1] == '-c':
         print "------Getting Negative Samples from File------"
-        XN = mergeX(positive= 0)
+        XN = mergeX(positive=0)
         rowsN, colsN = XN.shape
-        YN = np.zeros(shape=(rowsN,1), dtype = int)
-        
+        YN = np.zeros(shape=(rowsN, 1), dtype=int)
         print "------Getting Positive Samples from File------"
-        XP = mergeX(positive= 1)
+        XP = mergeX(positive=1)
         rowsP, colsP = XP.shape
-        YP = np.ones(shape=(rowsP,1),dtype = int)
-        
-        X = np.vstack((XP,XN))
-        y = np.vstack((YP,YN))
+        YP = np.ones(shape=(rowsP, 1), dtype=int)
+        X = np.vstack((XP, XN))
+        y = np.vstack((YP, YN))
         y = y.ravel()
 
         print "---------------Start The Model----------------"
         if sys.argv[2] == 'rbf':
             FILE_NAME = 'Model/model8kRBF.sav'
             FILE_NAME_SCALAR = 'Model/scalar8kRBF.sav'
-            X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = sv.svm(X,y,'rbf')
+            X_train, X_test, y_train, y_test, y_pred, classifier, cm, standardScaler = sv.svm(X, y, 'rbf')
         if sys.argv[2] == 'rf':
             FILE_NAME = 'Model/modelTkRF.sav'
             FILE_NAME_SCALAR = 'Model/scalarTkRF.sav'
-            X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = sv.randomF(X,y,100)
+            X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = sv.randomF(X, y, 100)
         if sys.argv[2] == 'linear':
             FILE_NAME = 'Model/modelALLLinear.sav'
             FILE_NAME_SCALAR = 'Model/scalarALLLinear.sav'
-            X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = sv.svm(X,y,'linear')
+            X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = sv.svm(X, y, 'linear')
 
         print "-----------------Save The Model---------------"
         pickle.dump(classifier, open(FILE_NAME, 'wb'))
