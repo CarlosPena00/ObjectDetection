@@ -108,44 +108,42 @@ def getSimpleHogMap(rMag, rDir):
     return histogramOfGradients
 
 
+# getHistogramOfGradients return the full histogram concat (1,X)
+# src input matrix
 
 
-
-##getHistogramOfGradients return the full histogram concat (1,X)
-#src input matrix
-def getHistogramOfGradients(src):        
-    gMag, gDir = cart2Polar(src) 
-    #Vector
+def getHistogramOfGradients(src):
+    gMag, gDir = cart2Polar(src)
+    # Vector
     # 0(180) | 20 | 40 | 60 | 80 | 100 | 120 | 140 | 160
-    cols,rows,channel = src.shape
+    cols, rows, channel = src.shape
     fullHOG = []
-    #Get Block 3x3 cells
-    for delX in range(0,(cols/8)-1):
-        for delY in range (0,(rows/8)-1):
+    # Get Block 3x3 cells
+    for delX in range(0, (cols / 8) - 1):
+        for delY in range(0, (rows / 8) - 1):
             cellHOG = []
-            #Block Area -> 3x3 cells
-            rMag, rDir = getROI(gMag,gDir,delY,delX,px = 16)#6*3 or 8*2
-            
-            for i in range (0,2): # 2x2 Block
-                for j in range(0,2):        
-                    cMag,cDir = getROI(gMag,gDir,i,j)                    
-                    #cellHOG.append(getSimpleHOG(rMag,rDir))
-                    cellHOG = np.hstack((cellHOG,getSimpleHogMap(cMag,cDir)))
-            summatory = np.sum(cellHOG)+0.1
-            cellHOG = np.sqrt( cellHOG /summatory)
-            fullHOG = np.append(fullHOG,cellHOG)
+            # Block Area -> 3x3 cells
+            rMag, rDir = getROI(gMag, gDir, delY, delX, px=16)  # 6*3 or 8*2
+            for i in range(0, 2):  # 2x2 Block
+                for j in range(0, 2):
+                    cMag, cDir = getROI(gMag, gDir, i, j)
+                    # cellHOG.append(getSimpleHOG(rMag,rDir))
+                    cellHOG = np.hstack((cellHOG, getSimpleHogMap(cMag, cDir)))
+            summatory = np.sum(cellHOG) + 0.1
+            cellHOG = np.sqrt(cellHOG / summatory)
+            fullHOG = np.append(fullHOG, cellHOG)
     fullHOGMatrix = np.asmatrix(fullHOG)
     return fullHOGMatrix
 
 
-##Just for debug
-#src = cv2.imread("Data/positive/1.jpg")
-#print src.shape
-#src2 = cv2.resize(src,(64,128))
-#print src2.shape
-#hog = getHistogramOfGradients(src3)
-#src = cv2.pyrDown(src)
-#src = cv2.pyrDown(src)
-#a = getHistogramOfGradients(src)
-#b = getHistogramOfGradients(src)
-#c = np.vstack((a,b))
+# Just for debug
+# src = cv2.imread("Data/positive/1.jpg")
+# print src.shape
+# src2 = cv2.resize(src,(64,128))
+# print src2.shape
+# hog = getHistogramOfGradients(src3)
+# src = cv2.pyrDown(src)
+# src = cv2.pyrDown(src)
+# a = getHistogramOfGradients(src)
+# b = getHistogramOfGradients(src)
+# c = np.vstack((a,b))
