@@ -93,6 +93,7 @@ def train(classifier, stdScaler, std=0):
         TYPEFILE = ".jpg"
         DIRECTORY = "Example/test"
         src = cv2.imread(DIRECTORY + TYPEFILE)
+        src = cv2.pyrUp(cv2.pyrDown(src))
         srcUp = src  # cv2.pyrDown(src)
         rows, cols, channel = srcUp.shape
         src2 = srcUp.copy()
@@ -136,6 +137,8 @@ def cutPositiveImg():
 if len(sys.argv) <= 1:
     print "Error not flags: -x n p || -c rbf rf linear || -l rbf rf linear"
 else:
+    if sys.argv[1] == '-?':
+        print "Error not flags: -x n p || -c rbf rf linear || -l rbf rf linear"
     if sys.argv[1] == '-x':
         if sys.argv[2] == 'n':
             XN = getX(fromFile=0, positive=0)
@@ -170,7 +173,7 @@ else:
         if sys.argv[2] == 'linear':
             FILE_NAME = 'Model/modelALLLinear.sav'
             FILE_NAME_SCALAR = 'Model/scalarALLLinear.sav'
-            X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = sv.svm(X, y, 'linear')
+            X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = sv.svmLinear(X, y, 0.01)
 
         print "-----------------Save The Model---------------"
         pickle.dump(classifier, open(FILE_NAME, 'wb'))
