@@ -8,14 +8,27 @@ from sklearn.metrics import confusion_matrix
 from sklearn.ensemble import RandomForestClassifier
 
 from sklearn.metrics import roc_curve, auc
+from sklearn.svm import LinearSVC
 
-
-def svm (X,y,Kernel = 'linear'):
+def svm (X,y,Kernel = 'rbf'):
     X_train, X_test, y_train, y_test = train_test_split(X,y, test_size = 0.30 , random_state = 0)
     sc_X = StandardScaler()
     X_train = sc_X.fit_transform(X_train)
     X_test = sc_X.transform(X_test)
-    classifier = SVC(kernel = Kernel)
+    classifier = SVC(kernel = Kernel)  # Kernel cam be linear, poly, rbf, sigmoid
+    classifier.fit(X_train,y_train)
+    y_pred = classifier.predict(X_test)
+    cm = confusion_matrix(y_test,y_pred)
+    print cm
+    print (cm[0,0]+cm[1,1])/float(cm.sum())
+    return X_train,X_test,y_train,y_test,y_pred,classifier,cm,sc_X
+
+def svmLinear (X,y,Ce=0.01):
+    X_train, X_test, y_train, y_test = train_test_split(X,y, test_size = 0.30 , random_state = 0)
+    sc_X = StandardScaler()
+    X_train = sc_X.fit_transform(X_train)
+    X_test = sc_X.transform(X_test)
+    classifier = LinearSVC(C=Ce)
     # Kernel cam be linear, poly, rbf, sigmoid
     classifier.fit(X_train,y_train)
     y_pred = classifier.predict(X_test)
