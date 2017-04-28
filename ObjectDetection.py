@@ -8,9 +8,9 @@ import pickle
 import sys
 from tqdm import tqdm
 from random import randint
-sys.path.insert(0, 'Example')
+sys.path.insert(0, 'Source')
 import HOG as HOG
-import svm as sv
+import machineLearning as ml
 NUM_OF_IMGS_P = 26466  # 13233#4964
 NUM_OF_IMGS_N = 4684
 # Input will be (86,86,?)
@@ -165,15 +165,15 @@ else:
         if sys.argv[2] == 'rbf':
             FILE_NAME = 'Model/model8kRBF.sav'
             FILE_NAME_SCALAR = 'Model/scalar8kRBF.sav'
-            X_train, X_test, y_train, y_test, y_pred, classifier, cm, standardScaler = sv.svm(X, y, 'rbf')
+            X_train, X_test, y_train, y_test, y_pred, classifier, cm, standardScaler = ml.svm(X, y, 'rbf')
         if sys.argv[2] == 'rf':
             FILE_NAME = 'Model/modelTkRF.sav'
             FILE_NAME_SCALAR = 'Model/scalarTkRF.sav'
-            X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = sv.randomF(X, y, 100)
+            X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = ml.randomF(X, y, 100)
         if sys.argv[2] == 'linear':
             FILE_NAME = 'Model/modelALLLinear.sav'
             FILE_NAME_SCALAR = 'Model/scalarALLLinear.sav'
-            X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = sv.svmLinear(X, y, 0.01)
+            X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = ml.svmLinear(X, y, 0.01)
 
         print "-----------------Save The Model---------------"
         pickle.dump(classifier, open(FILE_NAME, 'wb'))

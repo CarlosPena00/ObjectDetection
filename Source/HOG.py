@@ -68,7 +68,7 @@ def getSimpleHOG(rMag, rDir):
     return histogramOfGradients
 
 
-def getSimpleHogMap(rMag, rDir):
+def getSimpleHOGMap(rMag, rDir):
     histogramOfGradients = np.zeros(9)
     histogramOfGradients1 = np.zeros(9)
     histogramOfGradients2 = np.zeros(9)
@@ -152,7 +152,7 @@ def getHistogramOfGradients(src):
                 for j in range(0, 2):
                     cMag, cDir = getROI(gMag, gDir, i, j)
                     # cellHOG.append(getSimpleHOG(rMag,rDir))
-                    cellHOG = np.hstack((cellHOG, getSimpleHogMap(cMag, cDir)))
+                    cellHOG = np.hstack((cellHOG, getSimpleHOGMap(cMag, cDir)))
             summatory = np.sum(cellHOG) + 0.1
             cellHOG = np.sqrt(cellHOG / summatory)
             fullHOG = np.append(fullHOG, cellHOG)
@@ -160,9 +160,9 @@ def getHistogramOfGradients(src):
     return fullHOGMatrix
 
 
-# Just for debug
-# src = cv2.imread("Data/positive/1.jpg")
-# print src.shape
+if __name__ == "__main__":
+    src = cv2.imread("Data/positive/1.jpg")
+    print src.shape
 # src2 = cv2.resize(src,(64,128))
 # print src2.shape
 # hog = getHistogramOfGradients(src3)
