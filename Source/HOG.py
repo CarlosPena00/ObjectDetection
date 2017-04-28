@@ -13,8 +13,12 @@ import matplotlib.pyplot as plt
 
 
 def getROI(gMag, gDir, idY, idX=0, px=8):
-    rMag = gMag[(px + (idX - 1) * px):(px + idX * px) ,  (px + (idY - 1) * px):(px + idY * px), :]
-    rDir = gDir[(px + (idX - 1) * px):(px + idX * px), (px + (idY - 1) * px):(px + idY * px), :]
+    xMin = (px + (idX - 1) * px)
+    xMax = xMin + px
+    yMin = (px + (idY - 1) * px)
+    yMax = yMin + px
+    rMag = gMag[xMin:xMax, yMin:yMax, :]
+    rDir = gDir[xMin:xMax, yMin:yMax, :]
     return rMag, rDir
 # getROIsrc get region of interest, part of matrix
 # src input Matrix
@@ -49,7 +53,7 @@ def cart2Polar(src):
 
 
 def getSimpleHOG(rMag, rDir):
-    histogramOfGradients = np.zeros(9)
+    histogramOfGradients = np.zeros(9,dtype="float32")
     cols, rows, channel = rMag.shape
     for j in range(0, rows):
         for i in range(0, cols):
@@ -111,10 +115,12 @@ def getSimpleHOGMap(rMag, rDir):
 # getHistogramOfGradients return the full histogram concat (1,X)
 # src input matrix
 def getOpenCVHOG(image):
-    winSize = (80, 80)
+     
+    winSize = (64, 64)
     blockSize = (16, 16)
     blockStride = (8, 8)
     cellSize = (8, 8)
+    
     nbins = 9
     derivAperture = 1
     winSigma = 4.
@@ -137,22 +143,33 @@ def getOpenCVHOG(image):
 
 
 def getHistogramOfGradients(src):
+    
+    cv2.pyrDown(src)
+    cv2.pyrUp(src)
+    
+    print src.shape
+    
+    plt.imshow(src)
     gMag, gDir = cart2Polar(src)
     # Vector
     # 0(180) | 20 | 40 | 60 | 80 | 100 | 120 | 140 | 160
     cols, rows, channel = src.shape
-    fullHOG = []
+    fullHOG = np.float32()
     # Get Block 3x3 cells
-    for delX in range(0, (cols / 8) - 1):
-        for delY in range(0, (rows / 8) - 1):
-            cellHOG = []
+    maxX = (cols / 8) - 1
+    maxY = (rows / 8) - 1
+
+    for delX in range(0, maxX):
+        for delY in range(0, maxY):
+            cellHOG = np.float32()
             # Block Area -> 3x3 cells
             rMag, rDir = getROI(gMag, gDir, delY, delX, px=16)  # 6*3 or 8*2
             for i in range(0, 2):  # 2x2 Block
                 for j in range(0, 2):
-                    cMag, cDir = getROI(gMag, gDir, i, j)
+                    cMag, cDir = getROI(gMag, gDir, i, j, px=8)
                     # cellHOG.append(getSimpleHOG(rMag,rDir))
-                    cellHOG = np.hstack((cellHOG, getSimpleHOGMap(cMag, cDir)))
+                    cellHOG = np.hstack((cellHOG, getSimpleHOG(cMag, cDir)))
+                    
             summatory = np.sum(cellHOG) + 0.1
             cellHOG = np.sqrt(cellHOG / summatory)
             fullHOG = np.append(fullHOG, cellHOG)
@@ -161,8 +178,20 @@ def getHistogramOfGradients(src):
 
 
 if __name__ == "__main__":
-    src = cv2.imread("Data/positive/1.jpg")
-    print src.shape
+    dim = 76
+
+    src = cv2.imread("../TestImg/test8.jpg")
+    src[6, 6] = (0,0,0)
+    src[5, 5] = (0,0,0)
+    src[5, 6] = (0,0,0)
+    src[6, 5] = (0,0,0)
+    src = cv2.resize(src,(dim, dim))
+
+
+    aahist = getHistogramOfGradients(src)
+    aacvHist = getOpenCVHOG(src)
+    aacvHist = np.transpose(aacvHist)
+    
 # src2 = cv2.resize(src,(64,128))
 # print src2.shape
 # hog = getHistogramOfGradients(src3)
