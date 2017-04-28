@@ -1,0 +1,20 @@
+pisHOGpeopleDetector - Log Test
+test 1 (result: 2 people (gabriel and lucas) of 20 people)
+"-i" image path
+"-w" 8x8 default
+"-p" 16x16 default
+"-s" 1.05 scale pyrdow
+"-m" meanshift bound box grouping
+
+test 2 (result: dont work!)
+"-i" image path
+"-w" 16x16
+
+test 3 (result: 2 people (gabriel and lucas) of 20 people)
+"-i" image path
+"-w" 8x8 default
+"-p" 8x8 default
+"-s" 1.05 scale pyrdow
+"-m" meanshift bound box grouping
+
+Other tests had horrible results too
