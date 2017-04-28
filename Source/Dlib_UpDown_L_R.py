@@ -21,20 +21,21 @@ data = pd.read_csv("Data/positiveList.csv")
 
 foldName = data.iloc[:, :].values
 
-FOLDER = foldName[5][0]
-TYPEFILE = "." + foldName[5][1]
-CUT = foldName[5][2]
-NUMBER_OF_IMG = foldName[5][3]
+FOLDER = foldName[6][0]
+TYPEFILE = "." + foldName[6][1]
+CUT = foldName[6][2]
+NUMBER_OF_IMG = foldName[6][3]
 
 SAVEFILE = FOLDER[:-1] + ".csv"
 
 for i in tqdm(range(1, NUMBER_OF_IMG+1)):
     src = cv2.imread(DATAFOLDER+FOLDER+str(i)+TYPEFILE)
-    srcDown = cv2.pyrDown(src)
-    srcUpDown = cv2.pyrUp(srcDown)
-    srcResize = cv2.resize(srcUpDown,(86,86))
+    #srcDown = cv2.pyrDown(src)
+    #srcUpDown = cv2.pyrUp(srcDown)
+    srcResize = cv2.resize(src,(86,86))
+    
     srcFlip =cv2.flip(srcResize,1)
-    cv2.imwrite(DATAFOLDER+"dlib_Pos/Ready_png/"+str(i)+TYPEFILE,srcResize)
-    cv2.imwrite(DATAFOLDER+"dlib_Pos/Ready_png/"+str(i)+"F"+TYPEFILE,srcFlip)
+    cv2.imwrite(DATAFOLDER+"dlib_Pos/Normal_jpg/"+str(i)+TYPEFILE,srcResize)
+    cv2.imwrite(DATAFOLDER+"dlib_Pos/Normal_jpg/"+str(i)+"F"+TYPEFILE,srcFlip)
 
 
