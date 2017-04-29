@@ -155,6 +155,9 @@ def train(classifier, stdScaler, std=0):
         src = cv2.imread(DIRECTORY + TYPEFILE)
         #src = cv2.pyrUp(src)
         srcUp = src #cv2.pyrDown(src)
+
+        # srcUp = cv2.pyrUp( cv2.pyrDown(src))
+
         rows, cols, channel = srcUp.shape
         src2 = srcUp.copy()
         maxRows = rows / IMSIZE
@@ -246,8 +249,8 @@ else:
             FILE_NAME_SCALAR = 'Model/scalarTkRF.sav'
             X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = ml.randomF(X, y, 100)
         if sys.argv[2] == 'linear':
-            FILE_NAME = 'Model/modelALLLinear.sav'
-            FILE_NAME_SCALAR = 'Model/scalarALLLinear.sav'
+            FILE_NAME = 'Model/modelLinear.sav'
+            FILE_NAME_SCALAR = 'Model/scalarLinear.sav'
             X_train,X_test,y_train,y_test,y_pred,classifier,cm,standardScaler = ml.svmLinear(X, y, 0.01)
 
         print "-----------------Save The Model---------------"
@@ -265,8 +268,8 @@ else:
             FILE_NAME = 'Model/modelTkRF.sav'
             FILE_NAME_SCALAR = 'Model/scalarTkRF.sav'
         if sys.argv[2] == 'linear':
-            FILE_NAME = 'Model/modelALLLinear.sav'
-            FILE_NAME_SCALAR = 'Model/scalarALLLinear.sav'
+            FILE_NAME = 'Model/modelLinear.sav'
+            FILE_NAME_SCALAR = 'Model/scalarLinear.sav'
         classifier = pickle.load(open(FILE_NAME, 'rb'))
         standardScaler = pickle.load(open(FILE_NAME_SCALAR, 'rb'))
         train(classifier, standardScaler, std=1)
