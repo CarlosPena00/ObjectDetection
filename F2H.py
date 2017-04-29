@@ -17,7 +17,7 @@ import HOG as HOG
 import time
 IMSIZE = 76
 
-def folds2Hog(fromFile=0, positive=1, argMin=0, argMax=100):
+def folds2Hog(fromFile=0, positive=1, argMin=0, argMax=100, Blur = 0):
     DATAFOLDER = "Data/"
     CSVFOLDER = "CSV/"
     if positive == 0 and fromFile == 0:
@@ -39,15 +39,21 @@ def folds2Hog(fromFile=0, positive=1, argMin=0, argMax=100):
         print "----- Start Folder: " + FOLDER + " -----"
         time.sleep(1)
         fold2Hog(DATAFOLDER, CSVFOLDER, FOLDER,
-                 TYPEFILE, CUT, NUMBER_OF_IMG, SAVEFILE,)
+                 TYPEFILE, CUT, NUMBER_OF_IMG, SAVEFILE, Blur)
 
 
-def fold2Hog(DATAFOLDER, CSVFOLDER, FOLDER, TYPEFILE, CUT, NUMBER_OF_IMG, SAVEFILE):
+def fold2Hog(DATAFOLDER, CSVFOLDER, FOLDER, TYPEFILE, CUT, NUMBER_OF_IMG, SAVEFILE, Blur):
     lista = np.empty([1, 2369])
     for f in tqdm(range(1, NUMBER_OF_IMG + 1)):
         src = cv2.imread(DATAFOLDER + FOLDER + str(f) + TYPEFILE)
         rows, cols, channel = src.shape
+            
         if rows > 1 and cols > 1:
+        
+            if Blur == 1:
+                src = cv2.pyrUp(cv2.pyrDown(src))
+            rows, cols, channel = src.shape
+            
             if CUT == 1:
                 maxRows = rows / IMSIZE
                 maxCols = cols / IMSIZE
@@ -75,8 +81,10 @@ def fold2Hog(DATAFOLDER, CSVFOLDER, FOLDER, TYPEFILE, CUT, NUMBER_OF_IMG, SAVEFI
 
 
 if __name__ == "__main__":
+    print "Positive min max Blur"
     pos = int(sys.argv[1])
     minV = int(sys.argv[2])
     maxV = int(sys.argv[3])
+    Blur = int(sys.argv[4])
     print minV, maxV
-    folds2Hog(positive=pos, argMin=minV, argMax=maxV + 1)
+    folds2Hog(positive=pos, argMin=minV, argMax=maxV + 1, Blur=Blur)
