@@ -195,8 +195,7 @@ def train(classifier, stdScaler, std=0):
             yMin = bx[1]
             xMax = bx[2]
             yMax = bx[3]
-            #cv2.rectangle(src2, (yMin, xMin), (yMax, xMax), (0, 255, 0))
-            #print "Box detectado"
+            cv2.rectangle(src2, (yMin, xMin), (yMax, xMax), (0, 255, 0))
         cv2.imwrite("ID" + str(ID) + "Rect.jpg", src2)
         print "The ID: " + str(ID)
 
