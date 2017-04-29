@@ -21,6 +21,7 @@ IMSIZE = 76
 def non_max_suppression_fast(boxes, overlapThresh):
     # if there are no boxes, return an empty list
     if len(boxes) == 0:
+        print "Boxes Vazio"
         return []
  
     # if the bounding boxes integers, convert them to floats --
@@ -150,14 +151,15 @@ def train(classifier, stdScaler, std=0):
             print classifier.predict(histGE)
     else:
         TYPEFILE = ".jpg"
-        DIRECTORY = "TestImg/test"
+        DIRECTORY = "TestImg/test9"
         src = cv2.imread(DIRECTORY + TYPEFILE)
         #src = cv2.pyrUp(src)
-        srcUp = src  # cv2.pyrDown(src)
+        srcUp = src #cv2.pyrDown(src)
         rows, cols, channel = srcUp.shape
         src2 = srcUp.copy()
         maxRows = rows / IMSIZE
         maxCols = cols / IMSIZE
+        rects = []
         for j in tqdm(range(0, maxRows)):
             for i in range(0, maxCols):
                 for dY in range(0, 3):
@@ -170,21 +172,24 @@ def train(classifier, stdScaler, std=0):
                             roi = cv2.resize(roi, (IMSIZE, IMSIZE))
                         histG = HOG.getHistogramOfGradients(roi)
                         histGE = stdScaler.transform(histG)
-                        rects = []
+                        
                         if classifier.predict(histGE):
-                            cv2.rectangle(src2, (yMin, xMin), (yMax, xMax), (0, 0, 255))
-                            recs_aux = np.array([xMin, yMin, xMax yMax]) 
+                            #cv2.rectangle(src2, (yMin, xMin), (yMax, xMax), (0, 0, 255))
+                            recs_aux = np.array([xMin, yMin, xMax, yMax]) 
                             rects.append(recs_aux)
                             plt.imshow(cv2.cvtColor(roi, cv2.COLOR_BGR2RGB))
                             cv2.imwrite("Img/"+"ID"+str(ID)+str(j*1000)+str(i*100)+str(dY*10)+str(dX)+"Foi"+".jpg",roi)
-                        boxes = non_max_suppression_fast(np.vstack(rects), 0.3)
+
+        
+        boxes = non_max_suppression_fast(np.asarray(rects), 0.3)
 
         for bx in boxes:
-            xMin = bx[:,0]
-            yMin = bx[:,1]
-            xMax = bx[:,2]
-            yMax = bx[:,3]
+            xMin = bx[0]
+            yMin = bx[1]
+            xMax = bx[2]
+            yMax = bx[3]
             cv2.rectangle(src2, (yMin, xMin), (yMax, xMax), (0, 255, 0))
+            #print "Box detectado"
         cv2.imwrite("ID" + str(ID) + "Rect.jpg", src2)
         print "The ID: " + str(ID)
 
