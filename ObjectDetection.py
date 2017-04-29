@@ -14,8 +14,8 @@ import machineLearning as ml
 NUM_OF_IMGS_P = 26466  # 13233#4964
 NUM_OF_IMGS_N = 4684
 # Input will be (86,86,?)
-NumberOfDim = 2916
-
+NumberOfDim = 2369
+IMSIZE = 76
 
 def mergeX(positive=1):
     files2Merge = "list.txt"
@@ -85,30 +85,30 @@ def train(classifier, stdScaler, std=0):
         TYPEFILE = ".ppm"
         for i in tqdm(range(1, NUM_OF_IMGS + 1)):  # 13233
             src = cv2.imread(VAR + str(i) + TYPEFILE)
-            src = cv2.resize(src, (86, 86))
+            src = cv2.resize(src, (IMSIZE, IMSIZE))
             histG = HOG.getHistogramOfGradients(src)
             histGE = stdScaler.transform(histG)
             print classifier.predict(histGE)
     else:
         TYPEFILE = ".jpg"
-        DIRECTORY = "Example/test"
+        DIRECTORY = "TestImg/test"
         src = cv2.imread(DIRECTORY + TYPEFILE)
-        # src = cv2.pyrUp(cv2.pyrDown(src))
+        #src = cv2.pyrUp(src)
         srcUp = src  # cv2.pyrDown(src)
         rows, cols, channel = srcUp.shape
         src2 = srcUp.copy()
-        maxRows = rows / 86
-        maxCols = cols / 86
+        maxRows = rows / IMSIZE
+        maxCols = cols / IMSIZE
         for j in tqdm(range(0, maxRows)):
             for i in range(0, maxCols):
                 for dY in range(0, 3):
                     for dX in range(0, 3):
-                        roi, xMin, xMax, yMin, yMax = HOG.getROIsrc(srcUp, j, i, px=86, dy=dY*20, dx=dX*20)
+                        roi, xMin, xMax, yMin, yMax = HOG.getROIsrc(srcUp, j, i, px=IMSIZE, dy=dY*15, dx=dX*15)
                         rows, cols, channel = roi.shape
                         if rows == 0 or cols == 0:
                             break
-                        if rows != 86 or cols != 86:
-                            roi = cv2.resize(roi, (86, 86))
+                        if rows != IMSIZE or cols != IMSIZE:
+                            roi = cv2.resize(roi, (IMSIZE, IMSIZE))
                         histG = HOG.getHistogramOfGradients(roi)
                         histGE = stdScaler.transform(histG)
                         if classifier.predict(histGE):

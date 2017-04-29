@@ -173,7 +173,7 @@ def getHistogramOfGradients(src):
                 for j in range(0, 2):
                     cMag, cDir = getROI(rMag, rDir, i, j, px=8)
                     cellHOG = np.hstack((cellHOG, getSimpleHOGMap(cMag, cDir)))
-                    
+                
             summatory = np.sum(cellHOG) + 0.1
             cellHOG = np.sqrt(cellHOG / summatory)
             fullHOG = np.append(fullHOG, cellHOG)
@@ -193,7 +193,8 @@ if __name__ == "__main__":
 
 # src2 = cv2.resize(src,(64,128))
 # print src2.shape
-# hog = getHistogramOfGradients(src3)
+    hog = getHistogramOfGradients(src)
+    print hog.shape
 # src = cv2.pyrDown(src)
 # src = cv2.pyrDown(src)
 # a = getHistogramOfGradients(src)
