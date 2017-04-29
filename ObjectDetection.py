@@ -155,6 +155,9 @@ def train(classifier, stdScaler, std=0):
         src = cv2.imread(DIRECTORY + TYPEFILE)
         #src = cv2.pyrUp(src)
         srcUp = src #cv2.pyrDown(src)
+
+        # srcUp = cv2.pyrUp( cv2.pyrDown(src))
+
         rows, cols, channel = srcUp.shape
         src2 = srcUp.copy()
         maxRows = rows / IMSIZE
