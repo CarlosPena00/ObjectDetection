@@ -175,7 +175,6 @@ def train(classifier, stdScaler, std=0):
                             roi = cv2.resize(roi, (IMSIZE, IMSIZE))
                         histG = HOG.getHistogramOfGradients(roi)
                         histGE = stdScaler.transform(histG)
-                        
                         if classifier.predict(histGE):
                             #cv2.rectangle(src2, (yMin, xMin), (yMax, xMax), (0, 0, 255))
                             recs_aux = np.array([xMin, yMin, xMax, yMax]) 
@@ -192,7 +191,6 @@ def train(classifier, stdScaler, std=0):
             xMax = bx[2]
             yMax = bx[3]
             cv2.rectangle(src2, (yMin, xMin), (yMax, xMax), (0, 255, 0))
-            #print "Box detectado"
         cv2.imwrite("ID" + str(ID) + "Rect.jpg", src2)
         print "The ID: " + str(ID)
 
