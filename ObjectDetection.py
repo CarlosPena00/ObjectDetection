@@ -155,9 +155,6 @@ def train(classifier, stdScaler, std=0):
         src = cv2.imread(DIRECTORY + TYPEFILE)
         #src = cv2.pyrUp(src)
         srcUp = src #cv2.pyrDown(src)
-
-        # srcUp = cv2.pyrUp( cv2.pyrDown(src))
-
         rows, cols, channel = srcUp.shape
         src2 = srcUp.copy()
         maxRows = rows / IMSIZE
@@ -191,6 +188,7 @@ def train(classifier, stdScaler, std=0):
             xMax = bx[2]
             yMax = bx[3]
             cv2.rectangle(src2, (yMin, xMin), (yMax, xMax), (0, 255, 0))
+            #print "Box detectado"
         cv2.imwrite("ID" + str(ID) + "Rect.jpg", src2)
         print "The ID: " + str(ID)
 
