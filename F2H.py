@@ -17,7 +17,7 @@ import HOG as HOG
 import time
 IMSIZE = 76
 
-def folds2Hog(fromFile=0, positive=1, argMin=0, argMax=100, Blur = 0):
+def folds2Hog(fromFile=0, positive=1, argMin=0, argMax=100, Blur = 0, openCVHog = False):
     DATAFOLDER = "Data/"
     CSVFOLDER = "CSV/"
     if positive == 0 and fromFile == 0:
@@ -39,11 +39,11 @@ def folds2Hog(fromFile=0, positive=1, argMin=0, argMax=100, Blur = 0):
         print "----- Start Folder: " + FOLDER + " -----"
         time.sleep(1)
         fold2Hog(DATAFOLDER, CSVFOLDER, FOLDER,
-                 TYPEFILE, CUT, NUMBER_OF_IMG, SAVEFILE, Blur)
+                 TYPEFILE, CUT, NUMBER_OF_IMG, SAVEFILE, Blur, openCVHog)
 
 
-def fold2Hog(DATAFOLDER, CSVFOLDER, FOLDER, TYPEFILE, CUT, NUMBER_OF_IMG, SAVEFILE, Blur):
-    lista = np.empty([1, 2369])
+def fold2Hog(DATAFOLDER, CSVFOLDER, FOLDER, TYPEFILE, CUT, NUMBER_OF_IMG, SAVEFILE, Blur, openCVHog):
+    lista = np.empty([1,1764]) #np.empty([1, 2369])
     for f in tqdm(range(1, NUMBER_OF_IMG + 1)):
         src = cv2.imread(DATAFOLDER + FOLDER + str(f) + TYPEFILE)
         rows, cols, channel = src.shape
@@ -70,9 +70,10 @@ def fold2Hog(DATAFOLDER, CSVFOLDER, FOLDER, TYPEFILE, CUT, NUMBER_OF_IMG, SAVEFI
                     rowsR, colsR, channel = roi.shape
                     if rowsR != IMSIZE or colsR != IMSIZE:
                         roi = cv2.resize(roi, (IMSIZE, IMSIZE))
-                    histG = HOG.getHistogramOfGradients(roi)
+                    histG = HOG.getHistogramOfGradients(roi,openCVHog)
                     lista = np.vstack((lista, histG))
         else:
+            print "Error Img not fond"
             histG = np.zeros(2369)
             lista = np.vstack((lista, histG))
 
@@ -82,9 +83,18 @@ def fold2Hog(DATAFOLDER, CSVFOLDER, FOLDER, TYPEFILE, CUT, NUMBER_OF_IMG, SAVEFI
 
 if __name__ == "__main__":
     print "Positive min max Blur"
-    pos = int(sys.argv[1])
-    minV = int(sys.argv[2])
-    maxV = int(sys.argv[3])
-    Blur = int(sys.argv[4])
-    print minV, maxV
-    folds2Hog(positive=pos, argMin=minV, argMax=maxV + 1, Blur=Blur)
+    if len(sys.argv) > 4:
+        pos = int(sys.argv[1])
+        minV = int(sys.argv[2])
+        maxV = int(sys.argv[3])
+        Blur = int(sys.argv[4])
+        
+        print minV, maxV
+    else:
+        print "Argv no info, using default"
+        pos = 1
+        minV = 5
+        maxV = 6
+        Blur = 0
+    openCVHog = True
+    folds2Hog(positive=pos, argMin=minV, argMax=maxV + 1, Blur=Blur,openCVHog=openCVHog)
