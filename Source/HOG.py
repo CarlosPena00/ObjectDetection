@@ -13,14 +13,16 @@ import matplotlib.pyplot as plt
 
 
 def getROI(gMag, gDir, idY, idX=0, px=8):
-    xMin = (px + (idX - 1) * px)
+    xMin = idX * px
     xMax = xMin + px
-    yMin = (px + (idY - 1) * px)
+    yMin = idY * px
     yMax = yMin + px
     
     rMag = gMag[xMin:xMax, yMin:yMax, :]
     rDir = gDir[xMin:xMax, yMin:yMax, :]
-    return rMag, rDir 
+    return rMag, rDir
+
+     
 # getROIsrc get region of interest, part of matrix
 # src input Matrix
 # idY index of the block/cell
@@ -29,9 +31,9 @@ def getROI(gMag, gDir, idY, idX=0, px=8):
 
 
 def getROIsrc(src, idY, idX, px=8, dy=0, dx=0):
-    xMin = (dx + px + (idX - 1) * px)
+    xMin = dx + (idX * px)
     xMax = xMin + px
-    yMin = (dy + px + (idY - 1) * px)
+    yMin = dy + (idY * px)
     yMax = yMin + px
     return src[xMin:xMax, yMin:yMax, :], xMin, xMax, yMin, yMax
 
