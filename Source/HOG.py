@@ -12,12 +12,11 @@ import matplotlib.pyplot as plt
 # px shape of the block/cell (px,px,;)
 
 
-def getROI(gMag, gDir, idY, idX=0, px=8):
+def getROI(gMag, gDir, idX=0, idY=0, px=8):
     xMin = idX * px
     xMax = xMin + px
     yMin = idY * px
     yMax = yMin + px
-    
     rMag = gMag[xMin:xMax, yMin:yMax, :]
     rDir = gDir[xMin:xMax, yMin:yMax, :]
     return rMag, rDir
@@ -30,7 +29,7 @@ def getROI(gMag, gDir, idY, idX=0, px=8):
 # px shape of the block/cell (px,px,;)
 
 
-def getROIsrc(src, idY, idX, px=8, dy=0, dx=0):
+def getROIsrc(src, idX, idY, px=8, dy=0, dx=0):
     xMin = dx + (idX * px)
     xMax = xMin + px
     yMin = dy + (idY * px)
@@ -38,7 +37,7 @@ def getROIsrc(src, idY, idX, px=8, dy=0, dx=0):
     return src[xMin:xMax, yMin:yMax, :], xMin, xMax, yMin, yMax
 
 
-def getBlock(src,idY,idX,px=16):
+def getBlock(src,idX,idY,px=16):
     xMin = idX * (px/2)
     xMax = xMin + px
     yMin = idY * (px/2)
@@ -66,11 +65,11 @@ def cart2Polar(src):
 
 def getSimpleHOG(rMag, rDir):
     histogramOfGradients = np.zeros(9,dtype="float32")
-    cols, rows, channel = rMag.shape
-    for j in range(0, rows):
-        for i in range(0, cols):
+    rows, cols, channel = rMag.shape
+    for i in range(0, rows):
+        for j in range(0, cols):
             maxIndex = rMag[i][j].argmax()  # get Max magnitude (B;G;R)
-            hogIndex = rDir[i][j][maxIndex] / 20
+            hogIndex = rDir[i][j][maxIndex] / 20   
             if rDir[i][j][maxIndex] >= 180.0:
                 hogIndex = 0
             percentil = 1 - np.mod(rDir[i][j][maxIndex], 20) / 20
@@ -127,6 +126,7 @@ def getSimpleHOGMap(rMag, rDir):
 
 # getHistogramOfGradients return the full histogram concat (1,X)
 # src input matrix
+
 def getOpenCVHOG(image):
      
     winSize = (64, 64)
@@ -136,7 +136,7 @@ def getOpenCVHOG(image):
     
     nbins = 9
     derivAperture = 1
-    winSigma = 4.
+    winSigma = 4.0
     histogramNormType = 0
     L2HysThreshold = 2.0000000000000001e-01
     gammaCorrection = 0
@@ -147,6 +147,7 @@ def getOpenCVHOG(image):
                             histogramNormType, L2HysThreshold,
                             gammaCorrection, nlevels)
     # compute(img[, winStride[, padding[, locations]]]) -> descriptors
+    
     winStride = (8, 8)
     padding = (8, 8)
     locations = ((10, 20), )
@@ -163,7 +164,7 @@ def getHistogramOfGradients(src, useOpenCV=False):
     gMag, gDir = cart2Polar(src)
     # Vector
     # 0(180) | 20 | 40 | 60 | 80 | 100 | 120 | 140 | 160
-    cols, rows, channel = src.shape
+    rows, cols, channel = src.shape
     fullHOG = np.float32()
     # Get Block 3x3 cells
     maxX = (cols / 8) - 1
@@ -172,13 +173,13 @@ def getHistogramOfGradients(src, useOpenCV=False):
     for delX in range(0, maxX):
         for delY in range(0, maxY):
             cellHOG = np.float32()
-            rMag = getBlock(gMag,delY,delX,px=16)
-            rDir = getBlock(gDir,delY,delX,px=16)
+            rMag = getBlock(gMag,delX,delY,px=16)
+            rDir = getBlock(gDir,delX,delY,px=16)
             #cv2.imwrite("test/"+str(delX)+str(delY)+".jpg",mimSrc[0])
             for i in range(0, 2):  # 2x2 Block
                 for j in range(0, 2):
                     cMag, cDir = getROI(rMag, rDir, i, j, px=8)
-                    cellHOG = np.hstack((cellHOG, getSimpleHOGMap(cMag, cDir)))
+                    cellHOG = np.hstack((cellHOG, getSimpleHOG(cMag, cDir)))
                 
             summatory = np.sum(cellHOG) + 0.1
             cellHOG = np.sqrt(cellHOG / summatory)
@@ -205,7 +206,12 @@ if __name__ == "__main__":
     
     print hog1.flatten().shape
     
-    
+    src2 = getBlock(src,0 ,0,16)
+    mat = np.array([[1,2],[3,4]])
+    mat2 = mat.flatten()
+    hhhh = np.asmatrix(openCVHOG)
+    mat3 = mat[0].ravel()
+    mat3 = mat[0]
 # src = cv2.pyrDown(src)
 # src = cv2.pyrDown(src)
 # a = getHistogramOfGradients(src)

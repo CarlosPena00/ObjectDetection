@@ -151,7 +151,7 @@ def train(classifier, stdScaler, std=0):
             print classifier.predict(histGE)
     else:
         TYPEFILE = ".jpg"
-        DIRECTORY = "TestImg/test9"
+        DIRECTORY = "TestImg/test"
         src = cv2.imread(DIRECTORY + TYPEFILE)
         #src = cv2.pyrUp(src)
         rows,cols,channel = src.shape
@@ -167,13 +167,12 @@ def train(classifier, stdScaler, std=0):
         maxRows = rows / IMSIZE
         maxCols = cols / IMSIZE
         rects = []
-        for j in tqdm(range(0, maxRows)):
-            for i in range(0, maxCols):
-                for dY in range(0, 3):
-                    for dX in range(0, 3):
-                        roi, xMin, xMax, yMin, yMax = HOG.getROIsrc(srcUp, j, i, px=IMSIZE, dy=dY*20, dx=dX*20)
+        for i in tqdm(range(0, maxRows)):
+            for j in range(0, maxCols):
+                for dX in range(0, 3):
+                    for dY in range(0, 3):
+                        roi, xMin, xMax, yMin, yMax = HOG.getROIsrc(srcUp, i, j, px=IMSIZE, dy=dX*20, dx=dY*20)
                         rows, cols, channel = roi.shape
-                        cv2.rectangle(src2, (yMin, xMin), (yMax, xMax), (0, 0, 255))
                         if rows == 0 or cols == 0:
                             break
                         if rows != IMSIZE or cols != IMSIZE:
