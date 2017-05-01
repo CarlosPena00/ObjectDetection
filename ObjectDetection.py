@@ -14,7 +14,7 @@ import machineLearning as ml
 NUM_OF_IMGS_P = 26466  # 13233#4964
 NUM_OF_IMGS_N = 4684
 # Input will be (86,86,?)
-NumberOfDim = 2369
+NumberOfDim = 1764
 IMSIZE = 76
 
 # Malisiewicz et al. (overlapThresh  are normally between 0.3 and 0.5.)
@@ -146,7 +146,7 @@ def train(classifier, stdScaler, std=0):
         for i in tqdm(range(1, NUM_OF_IMGS + 1)):  # 13233
             src = cv2.imread(VAR + str(i) + TYPEFILE)
             src = cv2.resize(src, (IMSIZE, IMSIZE))
-            histG = HOG.getHistogramOfGradients(src)
+            histG = HOG.getHistogramOfGradients(src, useOpenCV=True)
             histGE = stdScaler.transform(histG)
             print classifier.predict(histGE)
     else:
@@ -154,7 +154,11 @@ def train(classifier, stdScaler, std=0):
         DIRECTORY = "TestImg/test9"
         src = cv2.imread(DIRECTORY + TYPEFILE)
         #src = cv2.pyrUp(src)
-        srcUp = src #cv2.pyrDown(src)
+        rows,cols,channel = src.shape
+        rows = int(rows * 1.5)
+        cols = int(cols * 1.5)
+        
+        srcUp = cv2.resize(src,(rows,cols)) #cv2.pyrDown(src)
 
         # srcUp = cv2.pyrUp( cv2.pyrDown(src))
 
@@ -167,13 +171,14 @@ def train(classifier, stdScaler, std=0):
             for i in range(0, maxCols):
                 for dY in range(0, 3):
                     for dX in range(0, 3):
-                        roi, xMin, xMax, yMin, yMax = HOG.getROIsrc(srcUp, j, i, px=IMSIZE, dy=dY*15, dx=dX*15)
+                        roi, xMin, xMax, yMin, yMax = HOG.getROIsrc(srcUp, j, i, px=IMSIZE, dy=dY*20, dx=dX*20)
                         rows, cols, channel = roi.shape
+                        cv2.rectangle(src2, (yMin, xMin), (yMax, xMax), (0, 0, 255))
                         if rows == 0 or cols == 0:
                             break
                         if rows != IMSIZE or cols != IMSIZE:
                             roi = cv2.resize(roi, (IMSIZE, IMSIZE))
-                        histG = HOG.getHistogramOfGradients(roi)
+                        histG = HOG.getHistogramOfGradients(roi, useOpenCV=True)
                         histGE = stdScaler.transform(histG)
                         
                         if classifier.predict(histGE):
@@ -191,7 +196,7 @@ def train(classifier, stdScaler, std=0):
             yMin = bx[1]
             xMax = bx[2]
             yMax = bx[3]
-            cv2.rectangle(src2, (yMin, xMin), (yMax, xMax), (0, 255, 0))
+            #cv2.rectangle(src2, (yMin, xMin), (yMax, xMax), (0, 255, 0))
             #print "Box detectado"
         cv2.imwrite("ID" + str(ID) + "Rect.jpg", src2)
         print "The ID: " + str(ID)

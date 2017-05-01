@@ -153,7 +153,11 @@ def getOpenCVHOG(image):
 
 
 
-def getHistogramOfGradients(src):
+def getHistogramOfGradients(src, useOpenCV=False):
+    if useOpenCV:
+        CVHog = getOpenCVHOG(src)
+        hog = np.transpose(CVHog)
+        return hog
     gMag, gDir = cart2Polar(src)
     # Vector
     # 0(180) | 20 | 40 | 60 | 80 | 100 | 120 | 140 | 160
@@ -184,17 +188,22 @@ def getHistogramOfGradients(src):
 if __name__ == "__main__":
     dim = 76
 
-    src = cv2.imread("../TestImg/test8.jpg")
-    src[6, 6] = (0,0,0)
-    src[5, 5] = (0,0,0)
-    src[5, 6] = (0,0,0)
-    src[6, 5] = (0,0,0)
+    src = cv2.imread("../TestImg/test9.jpg")
+
     src = cv2.resize(src,(dim, dim))
 
 # src2 = cv2.resize(src,(64,128))
 # print src2.shape
-    hog = getHistogramOfGradients(src)
-    print hog.shape
+
+    hog = getHistogramOfGradients(src,useOpenCV=True)
+    hog1 = getHistogramOfGradients(src,useOpenCV=False)
+    
+    openCVHOG = np.squeeze(np.asarray(hog))
+    carlosHeitorHog = np.squeeze(np.asarray(hog1))
+    
+    print hog1.flatten().shape
+    
+    
 # src = cv2.pyrDown(src)
 # src = cv2.pyrDown(src)
 # a = getHistogramOfGradients(src)
