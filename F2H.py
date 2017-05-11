@@ -11,6 +11,7 @@ import cv2
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 import sys
 sys.path.insert(0, 'Source')
 import HOG as HOG
@@ -64,10 +65,15 @@ def fold2Hog(DATAFOLDER, CSVFOLDER, FOLDER, TYPEFILE, CUT, NUMBER_OF_IMG, SAVEFI
                 for i in range(0, maxCols):
                     if CUT == 1:
                         roi, xMin, xMax, yMin, yMax = HOG.getROIsrc(
-                            src, i, j, px=IMSIZE)
+                            src, j, i, px=IMSIZE)
                     if CUT == 0:
                         roi = src
                     rowsR, colsR, channel = roi.shape
+                    
+                    if rowsR < 1 or colsR < 1:
+                        print "F2H Fold2Hog erro Size"
+                        continue
+                    
                     if rowsR != IMSIZE or colsR != IMSIZE:
                         roi = cv2.resize(roi, (IMSIZE, IMSIZE))
                     histG = HOG.getHistogramOfGradients(roi,openCVHog)
@@ -92,7 +98,7 @@ if __name__ == "__main__":
         print minV, maxV
     else:
         print "Argv no info, using default"
-        pos = 1
+        pos = 0
         minV = 5
         maxV = 6
         Blur = 0

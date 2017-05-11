@@ -221,14 +221,7 @@ else:
     if sys.argv[1] == '-?':
         print "Error not flags: -x n p || -c rbf rf linear || -l rbf rf linear"
     if sys.argv[1] == '-x':
-        if sys.argv[2] == 'n':
-            XN = getX(fromFile=0, positive=0)
-            rows, cols = XN.shape
-            YN = np.zeros(shape=(rows, 1), dtype=int)
-        if sys.argv[2] == 'p':
-            XP = getX(fromFile=0, positive=1)
-            rows, cols = XP.shape
-            YP = np.ones(shape=(rows, 1), dtype=int)
+        print "Use the Fold2Hog fucntion in F2H.py"
     if sys.argv[1] == '-c':
         print "------Getting Negative Samples from File------"
         XN = mergeX(positive=0)
