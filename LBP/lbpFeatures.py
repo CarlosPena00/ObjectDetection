@@ -48,7 +48,7 @@ def getHistogramOfLBP(image):
 			summ = int(summ)
 			cellLBP = np.float32(summ)
 			fullLBP = np.append(fullLBP, cellLBP)
-    fullLBPMatrix = np.asmatrix(fullLBP)
-    return fullLBPMatrix
+	fullLBPMatrix = np.asmatrix(fullLBP)
+	return fullLBPMatrix
 
 
