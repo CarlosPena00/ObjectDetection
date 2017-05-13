@@ -1,5 +1,5 @@
-## @package HOG
- 
+# @package HOG
+
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -21,7 +21,7 @@ def getROI(gMag, gDir, idX=0, idY=0, px=8):
     rDir = gDir[xMin:xMax, yMin:yMax, :]
     return rMag, rDir
 
-     
+
 # getROIsrc get region of interest, part of matrix
 # src input Matrix
 # idY index of the block/cell
@@ -37,10 +37,10 @@ def getROIsrc(src, idX, idY, px=8, dy=0, dx=0):
     return src[xMin:xMax, yMin:yMax, :], xMin, xMax, yMin, yMax
 
 
-def getBlock(src,idX,idY,px=16):
-    xMin = idX * (px/2)
+def getBlock(src, idX, idY, px=16):
+    xMin = idX * (px / 2)
     xMax = xMin + px
-    yMin = idY * (px/2)
+    yMin = idY * (px / 2)
     yMax = yMin + px
     return src[xMin:xMax, yMin:yMax, :]
 
@@ -64,12 +64,12 @@ def cart2Polar(src):
 
 
 def getSimpleHOG(rMag, rDir):
-    histogramOfGradients = np.zeros(9,dtype="float32")
+    histogramOfGradients = np.zeros(9, dtype="float32")
     rows, cols, channel = rMag.shape
     for i in range(0, rows):
         for j in range(0, cols):
             maxIndex = rMag[i][j].argmax()  # get Max magnitude (B;G;R)
-            hogIndex = rDir[i][j][maxIndex] / 20   
+            hogIndex = rDir[i][j][maxIndex] / 20
             if rDir[i][j][maxIndex] >= 180.0:
                 hogIndex = 0
             percentil = 1 - np.mod(rDir[i][j][maxIndex], 20) / 20
@@ -84,11 +84,12 @@ def getSimpleHOG(rMag, rDir):
 
 
 def getSimpleHOGMap(rMag, rDir):
-    histogramOfGradients = np.zeros(9,dtype="float32")
-    histogramOfGradients1 = np.zeros(9,dtype="float32")
-    histogramOfGradients2 = np.zeros(9,dtype="float32")
+    histogramOfGradients = np.zeros(9, dtype="float32")
+    histogramOfGradients1 = np.zeros(9, dtype="float32")
+    histogramOfGradients2 = np.zeros(9, dtype="float32")
     rMag = np.asarray(rMag)
-    R, G, B = np.float32(rMag[:, :, 0]), np.float32(rMag[:, :, 1]), np.float32(rMag[:, :, 2])
+    R, G, B = np.float32(rMag[:, :, 0]), np.float32(
+        rMag[:, :, 1]), np.float32(rMag[:, :, 2])
     Max = np.argmax([R.flatten(), G.flatten(), B.flatten()], axis=0)
     Max.reshape(R.shape)
     aux1 = Max == 0
@@ -102,7 +103,8 @@ def getSimpleHOGMap(rMag, rDir):
     maskedRmag = np.float32(rMag[mask].reshape(Max.shape))
     hogIndex = maskedRdir / 20
     hogIndex[hogIndex >= 9] = 0
-    percentil = np.ones(Max.shape,dtype="float32") - np.mod(maskedRdir, 20) / 20
+    percentil = np.ones(Max.shape, dtype="float32") - \
+        np.mod(maskedRdir, 20) / 20
     value = maskedRmag * percentil
     nextValue = maskedRmag - value
     b = np.floor(hogIndex.flatten())
@@ -128,12 +130,12 @@ def getSimpleHOGMap(rMag, rDir):
 # src input matrix
 
 def getOpenCVHOG(image):
-     
+
     winSize = (64, 64)
     blockSize = (16, 16)
     blockStride = (8, 8)
     cellSize = (8, 8)
-    
+
     nbins = 9
     derivAperture = 1
     winSigma = 4.0
@@ -147,13 +149,12 @@ def getOpenCVHOG(image):
                             histogramNormType, L2HysThreshold,
                             gammaCorrection, nlevels)
     # compute(img[, winStride[, padding[, locations]]]) -> descriptors
-    
+
     winStride = (8, 8)
     padding = (8, 8)
     locations = ((10, 20), )
     hist = hog.compute(image, winStride, padding, locations)
     return hist
-
 
 
 def getHistogramOfGradients(src, useOpenCV=False):
@@ -173,14 +174,14 @@ def getHistogramOfGradients(src, useOpenCV=False):
     for delX in range(0, maxX):
         for delY in range(0, maxY):
             cellHOG = np.float32()
-            rMag = getBlock(gMag,delX,delY,px=16)
-            rDir = getBlock(gDir,delX,delY,px=16)
-            #cv2.imwrite("test/"+str(delX)+str(delY)+".jpg",mimSrc[0])
+            rMag = getBlock(gMag, delX, delY, px=16)
+            rDir = getBlock(gDir, delX, delY, px=16)
+            # cv2.imwrite("test/"+str(delX)+str(delY)+".jpg",mimSrc[0])
             for i in range(0, 2):  # 2x2 Block
                 for j in range(0, 2):
                     cMag, cDir = getROI(rMag, rDir, i, j, px=8)
                     cellHOG = np.hstack((cellHOG, getSimpleHOG(cMag, cDir)))
-                
+
             summatory = np.sum(cellHOG) + 0.1
             cellHOG = np.sqrt(cellHOG / summatory)
             fullHOG = np.append(fullHOG, cellHOG)
@@ -193,21 +194,21 @@ if __name__ == "__main__":
 
     src = cv2.imread("../TestImg/test9.jpg")
 
-    src = cv2.resize(src,(dim, dim))
+    src = cv2.resize(src, (dim, dim))
 
 # src2 = cv2.resize(src,(64,128))
 # print src2.shape
 
-    hog = getHistogramOfGradients(src,useOpenCV=True)
-    hog1 = getHistogramOfGradients(src,useOpenCV=False)
-    
+    hog = getHistogramOfGradients(src, useOpenCV=True)
+    hog1 = getHistogramOfGradients(src, useOpenCV=False)
+
     openCVHOG = np.squeeze(np.asarray(hog))
     carlosHeitorHog = np.squeeze(np.asarray(hog1))
-    
+
     print hog1.flatten().shape
-    
-    src2 = getBlock(src,0 ,0,16)
-    mat = np.array([[1,2],[3,4]])
+
+    src2 = getBlock(src, 0, 0, 16)
+    mat = np.array([[1, 2], [3, 4]])
     mat2 = mat.flatten()
     hhhh = np.asmatrix(openCVHOG)
     mat3 = mat[0].ravel()
