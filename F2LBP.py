@@ -46,7 +46,7 @@ def folds2LBP(fromFile=0, positive=1, argMin=0, argMax=100, Blur = 0):
 
 
 def fold2LBP(DATAFOLDER, CSVFOLDER, FOLDER, TYPEFILE, CUT, NUMBER_OF_IMG, SAVEFILE, Blur):
-    lista = np.empty([1,1764]) #np.empty([1, 2369])
+    lista = np.empty([1,5477]) #np.empty([1, 2369])
     for f in tqdm(range(1, NUMBER_OF_IMG + 1)):
         src = cv2.imread(DATAFOLDER + FOLDER + str(f) + TYPEFILE)
         rows, cols, channel = src.shape
@@ -79,15 +79,15 @@ def fold2LBP(DATAFOLDER, CSVFOLDER, FOLDER, TYPEFILE, CUT, NUMBER_OF_IMG, SAVEFI
                     if rowsR != IMSIZE or colsR != IMSIZE:
                         roi = cv2.resize(roi, (IMSIZE, IMSIZE))
                     histLBP = LBP.getHistogramOfLBP(roi)
-                    
+                    # print lista.shape , histLBP.shape, roi.shape
                     lista = np.vstack((lista, histLBP))
         else:
             print "Error Img not fond"
-            histLBP = np.zeros(2369)
+            histLBP = np.zeros(5477)
             lista = np.vstack((lista, histLBP))
 
     X = np.delete(lista, (0), axis=0)
-    np.savetxt(CSVFOLDER + SAVEFILE, X, delimiter=",", fmt="%f")
+    np.savetxt("LBP_"+CSVFOLDER + SAVEFILE, X, delimiter=",", fmt="%f")
 
 
 if __name__ == "__main__":
