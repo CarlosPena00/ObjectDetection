@@ -139,65 +139,49 @@ def getX(fromFile=0, positive=1, files=1, idT=0, save=0):
 
 def train(classifier, stdScaler, std=0):
     ID = randint(0, 99999)
-    if std == 0:
-        VAR = "Data/positive2/"
-        NUM_OF_IMGS = NUM_OF_IMGS_P
-        TYPEFILE = ".ppm"
-        for i in tqdm(range(1, NUM_OF_IMGS + 1)):  # 13233
-            src = cv2.imread(VAR + str(i) + TYPEFILE)
-            src = cv2.resize(src, (IMSIZE, IMSIZE))
-            histG = HOG.getHistogramOfGradients(src, useOpenCV=True)
-            histGE = stdScaler.transform(histG)
-            print classifier.predict(histGE)
-    else:
-        TYPEFILE = ".jpg"
-        DIRECTORY = "TestImg/test"
-        src = cv2.imread(DIRECTORY + TYPEFILE)
-        #src = cv2.pyrUp(src)
-        rows,cols,channel = src.shape
-        rows = int(rows * 1.5)
-        cols = int(cols * 1.5)
-        
-        srcUp = cv2.resize(src,(rows,cols)) #cv2.pyrDown(src)
+    TYPEFILE = ".jpg"
+    DIRECTORY = "TestImg/test"
+    src = cv2.imread(DIRECTORY + TYPEFILE)
+    #src = cv2.pyrUp(src)
+    rows,cols,channel = src.shape
+    rows = int(rows * 1.5)
+    cols = int(cols * 1.5)    
+    srcUp = cv2.resize(src,(rows,cols)) #cv2.pyrDown(src)
+    # srcUp = cv2.pyrUp( cv2.pyrDown(src))
+    rows, cols, channel = srcUp.shape
+    src2 = srcUp.copy()
+    maxRows = rows / IMSIZE
+    maxCols = cols / IMSIZE
+    rects = []
+    for i in tqdm(range(0, maxRows)):
+        for j in range(0, maxCols):
+            for dX in range(0, 3):
+                for dY in range(0, 3):
+                    roi, xMin, xMax, yMin, yMax = HOG.getROIsrc(srcUp, i, j, px=IMSIZE, dy=dX*20, dx=dY*20)
+                    rows, cols, channel = roi.shape
+                    if rows == 0 or cols == 0:
+                        break
+                    if rows != IMSIZE or cols != IMSIZE:
+                        roi = cv2.resize(roi, (IMSIZE, IMSIZE))
+                    histG = HOG.getHistogramOfGradients(roi, useOpenCV=True)
+                    histGE = stdScaler.transform(histG)
+                    if classifier.predict(histGE):
+                        #cv2.rectangle(src2, (yMin, xMin), (yMax, xMax), (0, 0, 255))
+                        recs_aux = np.array([xMin, yMin, xMax, yMax]) 
+                        rects.append(recs_aux)
+                        plt.imshow(cv2.cvtColor(roi, cv2.COLOR_BGR2RGB))
+                        cv2.imwrite("Img/"+"ID"+str(ID)+str(j*1000)+str(i*100)+str(dY*10)+str(dX)+"Foi"+".jpg",roi)
+    boxes = non_max_suppression_fast(np.asarray(rects), 0.3)
 
-        # srcUp = cv2.pyrUp( cv2.pyrDown(src))
-
-        rows, cols, channel = srcUp.shape
-        src2 = srcUp.copy()
-        maxRows = rows / IMSIZE
-        maxCols = cols / IMSIZE
-        rects = []
-        for i in tqdm(range(0, maxRows)):
-            for j in range(0, maxCols):
-                for dX in range(0, 3):
-                    for dY in range(0, 3):
-                        roi, xMin, xMax, yMin, yMax = HOG.getROIsrc(srcUp, i, j, px=IMSIZE, dy=dX*20, dx=dY*20)
-                        rows, cols, channel = roi.shape
-                        if rows == 0 or cols == 0:
-                            break
-                        if rows != IMSIZE or cols != IMSIZE:
-                            roi = cv2.resize(roi, (IMSIZE, IMSIZE))
-                        histG = HOG.getHistogramOfGradients(roi, useOpenCV=True)
-                        histGE = stdScaler.transform(histG)
-                        if classifier.predict(histGE):
-                            #cv2.rectangle(src2, (yMin, xMin), (yMax, xMax), (0, 0, 255))
-                            recs_aux = np.array([xMin, yMin, xMax, yMax]) 
-                            rects.append(recs_aux)
-                            plt.imshow(cv2.cvtColor(roi, cv2.COLOR_BGR2RGB))
-                            cv2.imwrite("Img/"+"ID"+str(ID)+str(j*1000)+str(i*100)+str(dY*10)+str(dX)+"Foi"+".jpg",roi)
-
-        
-        boxes = non_max_suppression_fast(np.asarray(rects), 0.3)
-
-        for bx in boxes:
-            xMin = bx[0]
-            yMin = bx[1]
-            xMax = bx[2]
-            yMax = bx[3]
-            cv2.rectangle(src2, (yMin, xMin), (yMax, xMax), (0, 255, 0))
-            #print "Box detectado"
-        cv2.imwrite("ID" + str(ID) + "Rect.jpg", src2)
-        print "The ID: " + str(ID)
+    for bx in boxes:
+        xMin = bx[0]
+        yMin = bx[1]
+        xMax = bx[2]
+        yMax = bx[3]
+        cv2.rectangle(src2, (yMin, xMin), (yMax, xMax), (0, 255, 0))
+        #print "Box detectado"
+    cv2.imwrite("ID" + str(ID) + "Rect.jpg", src2)
+    print "The ID: " + str(ID)
 
 
 def cutPositiveImg():

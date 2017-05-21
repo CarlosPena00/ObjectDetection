@@ -10,13 +10,18 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import roc_curve, auc
 from sklearn.svm import LinearSVC
 
-
-def svm(X, y, Kernel='rbf'):
+def getTrainNTest(X,y):
+    print "----- Start To Split -----"
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.30, random_state=0)
     sc_X = StandardScaler()
     X_train = sc_X.fit_transform(X_train)
     X_test = sc_X.transform(X_test)
+    return X_train, X_test, y_train, y_test, sc_X
+    
+
+def svm(X, y, Kernel='rbf'):
+    X_train, X_test, y_train, y_test, sc_X = getTrainNTest(X,y)
     classifier = SVC(kernel=Kernel)  # Kernel cam be linear, poly, rbf, sigmoid
     classifier.fit(X_train, y_train)
     y_pred = classifier.predict(X_test)
@@ -27,11 +32,7 @@ def svm(X, y, Kernel='rbf'):
 
 
 def svmLinear(X, y, Ce=0.01):
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.30, random_state=0)
-    sc_X = StandardScaler()
-    X_train = sc_X.fit_transform(X_train)
-    X_test = sc_X.transform(X_test)
+    X_train, X_test, y_train, y_test, sc_X = getTrainNTest(X,y)
     classifier = LinearSVC(C=Ce)
     # Kernel cam be linear, poly, rbf, sigmoid
     classifier.fit(X_train, y_train)
@@ -43,13 +44,8 @@ def svmLinear(X, y, Ce=0.01):
 
 
 def randomF(X, y, N=100, theads=3):
-    print "----- Start To Split -----"
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.30, random_state=0)
-    sc_X = StandardScaler()
+    X_train, X_test, y_train, y_test, sc_X = getTrainNTest(X,y)
     print "----- Start Classifier -----"
-    X_train = sc_X.fit_transform(X_train)
-    X_test = sc_X.transform(X_test)
     classifier = RandomForestClassifier(
         n_estimators=N, n_jobs=theads, criterion='entropy')
     classifier.fit(X_train, y_train)
